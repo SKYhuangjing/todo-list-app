@@ -1,0 +1,26 @@
+[package]
+name = "todo-core"
+version = "0.1.0"
+edition = "2021"
+description = "TODO List 核心业务逻辑库"
+
+[lib]
+name = "todo_core"
+crate-type = ["lib", "cdylib", "staticlib"]
+
+[[bin]]
+name = "uniffi-bindgen"
+path = "src/bin/uniffi-bindgen.rs"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+uuid = { version = "1", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+thiserror = "1"
+
+# UniFFI 绑定（用于 Swift）
+uniffi = { version = "0.28", features = ["cli"] }
+
+[build-dependencies]
+uniffi = { version = "0.28", features = ["build"] }

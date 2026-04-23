@@ -1,0 +1,5 @@
+[bindings.swift]
+# Swift 绑定配置
+module_name = "TodoCore"
+ffi_module_name = "TodoCoreFFI"
+generate_module_map = true

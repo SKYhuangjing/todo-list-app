@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366F1"/>
+      <stop offset="50%" style="stop-color:#8B5CF6"/>
+      <stop offset="100%" style="stop-color:#EC4899"/>
+    </linearGradient>
+    <linearGradient id="glassGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:white;stop-opacity:0.4"/>
+      <stop offset="100%" style="stop-color:white;stop-opacity:0.1"/>
+    </linearGradient>
+  </defs>
+  <!-- 渐变背景 -->
+  <rect x="64" y="64" width="896" height="896" rx="180" ry="180" fill="url(#bgGradient)"/>
+  <!-- 玻璃拟态卡片 -->
+  <rect x="200" y="280" width="624" height="464" rx="60" ry="60" fill="url(#glassGradient)" stroke="white" stroke-opacity="0.3" stroke-width="2"/>
+  <!-- 三条任务线 -->
+  <g fill="white">
+    <!-- 任务1 - 已完成 -->
+    <circle cx="300" cy="400" r="28" fill="white" opacity="0.9"/>
+    <path d="M282 400 L295 413 L318 387" fill="none" stroke="#8B5CF6" stroke-width="8" stroke-linecap="round"/>
+    <rect x="360" y="386" width="400" height="28" rx="14" opacity="0.6"/>
+    <!-- 任务2 -->
+    <circle cx="300" cy="510" r="28" fill="none" stroke="white" stroke-width="6" opacity="0.8"/>
+    <rect x="360" y="496" width="320" height="28" rx="14" opacity="0.4"/>
+    <!-- 任务3 -->
+    <circle cx="300" cy="620" r="28" fill="none" stroke="white" stroke-width="6" opacity="0.8"/>
+    <rect x="360" y="606" width="380" height="28" rx="14" opacity="0.4"/>
+  </g>
+</svg>

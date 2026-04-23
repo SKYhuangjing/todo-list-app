@@ -1,0 +1,65 @@
+namespace todo_core {
+    // 工具函数
+    string generate_uuid();
+    string get_current_timestamp();
+    string get_today_date();
+    ShortcutConfig get_default_shortcuts();
+    [Throws=CoreError]
+    ExportData parse_export_json(string json_content);
+    [Throws=CoreError]
+    string create_export_json(ExportData data);
+};
+
+// 自定义错误类型
+[Error]
+enum CoreError {
+    "ParseError",
+    "SerializeError",
+};
+
+// 数据结构
+dictionary Todo {
+    string id;
+    string title;
+    string? content;
+    string? screenshot_path;
+    string? due_date;
+    string status;
+    string created_at;
+    string updated_at;
+    string? completed_at;
+};
+
+dictionary Tag {
+    string id;
+    string name;
+    string color;
+    string created_at;
+};
+
+dictionary ShortcutConfig {
+    string quick_input;
+    string show_list;
+};
+
+dictionary ExportData {
+    string version;
+    string exported_at;
+    sequence<TodoExport> todos;
+    sequence<TagExport> tags;
+};
+
+dictionary TodoExport {
+    string title;
+    string? content;
+    string? due_date;
+    string status;
+    sequence<string> tags;
+    string created_at;
+    string? completed_at;
+};
+
+dictionary TagExport {
+    string name;
+    string color;
+};
