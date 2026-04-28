@@ -42,35 +42,39 @@ enum AccentToken: String, CaseIterable, Identifiable, Codable, Sendable {
     }
 
     var color: Color {
+        Self.adaptive(light: color(for: .light), dark: color(for: .dark))
+    }
+
+    func color(for colorScheme: ColorScheme) -> Color {
         switch self {
-        case .inkNavy: return Self.adaptive(
-            light: Color(red: 30.0/255.0, green: 58.0/255.0, blue: 95.0/255.0),
-            dark: Color(red: 143.0/255.0, green: 174.0/255.0, blue: 212.0/255.0)
-        )
-        case .graphite: return Self.adaptive(
-            light: Color(red: 62.0/255.0, green: 70.0/255.0, blue: 84.0/255.0),
-            dark: Color(red: 178.0/255.0, green: 188.0/255.0, blue: 206.0/255.0)
-        )
-        case .cypress: return Self.adaptive(
-            light: Color(red: 43.0/255.0, green: 87.0/255.0, blue: 80.0/255.0),
-            dark: Color(red: 127.0/255.0, green: 179.0/255.0, blue: 169.0/255.0)
-        )
-        case .porcelainBlue: return Self.adaptive(
-            light: Color(red: 58.0/255.0, green: 111.0/255.0, blue: 224.0/255.0),
-            dark: Color(red: 108.0/255.0, green: 147.0/255.0, blue: 242.0/255.0)
-        )
-        case .warmOrange: return Self.adaptive(
-            light: Color(red: 240.0/255.0, green: 138.0/255.0, blue: 44.0/255.0),
-            dark: Color(red: 255.0/255.0, green: 163.0/255.0, blue: 71.0/255.0)
-        )
-        case .forestGreen: return Self.adaptive(
-            light: Color(red: 47.0/255.0, green: 158.0/255.0, blue: 101.0/255.0),
-            dark: Color(red: 69.0/255.0, green: 194.0/255.0, blue: 129.0/255.0)
-        )
-        case .violet: return Self.adaptive(
-            light: Color(red: 124.0/255.0, green: 90.0/255.0, blue: 232.0/255.0),
-            dark: Color(red: 164.0/255.0, green: 140.0/255.0, blue: 255.0/255.0)
-        )
+        case .inkNavy:
+            return colorScheme == .dark
+                ? Color(red: 143.0/255.0, green: 174.0/255.0, blue: 212.0/255.0)
+                : Color(red: 30.0/255.0, green: 58.0/255.0, blue: 95.0/255.0)
+        case .graphite:
+            return colorScheme == .dark
+                ? Color(red: 178.0/255.0, green: 188.0/255.0, blue: 206.0/255.0)
+                : Color(red: 62.0/255.0, green: 70.0/255.0, blue: 84.0/255.0)
+        case .cypress:
+            return colorScheme == .dark
+                ? Color(red: 127.0/255.0, green: 179.0/255.0, blue: 169.0/255.0)
+                : Color(red: 43.0/255.0, green: 87.0/255.0, blue: 80.0/255.0)
+        case .porcelainBlue:
+            return colorScheme == .dark
+                ? Color(red: 108.0/255.0, green: 147.0/255.0, blue: 242.0/255.0)
+                : Color(red: 58.0/255.0, green: 111.0/255.0, blue: 224.0/255.0)
+        case .warmOrange:
+            return colorScheme == .dark
+                ? Color(red: 255.0/255.0, green: 163.0/255.0, blue: 71.0/255.0)
+                : Color(red: 240.0/255.0, green: 138.0/255.0, blue: 44.0/255.0)
+        case .forestGreen:
+            return colorScheme == .dark
+                ? Color(red: 69.0/255.0, green: 194.0/255.0, blue: 129.0/255.0)
+                : Color(red: 47.0/255.0, green: 158.0/255.0, blue: 101.0/255.0)
+        case .violet:
+            return colorScheme == .dark
+                ? Color(red: 164.0/255.0, green: 140.0/255.0, blue: 255.0/255.0)
+                : Color(red: 124.0/255.0, green: 90.0/255.0, blue: 232.0/255.0)
         case .systemAccent:
             #if canImport(AppKit)
             return Color(nsColor: .controlAccentColor)

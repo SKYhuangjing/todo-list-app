@@ -6,6 +6,7 @@ struct MenuBarDashboardView: View {
     let router: AppRouter
 
     @Environment(\.theme) private var theme
+    @Environment(\.openSettings) private var openSettings
     @Environment(LocalizationStore.self) private var localizationStore
 
     var body: some View {
@@ -30,7 +31,7 @@ struct MenuBarDashboardView: View {
         }
         .padding(Space.lg)
         .frame(width: 320)
-        .background(SurfaceColor.canvas.ignoresSafeArea())
+        .background(.regularMaterial)
     }
 
     private var summary: some View {
@@ -46,9 +47,14 @@ struct MenuBarDashboardView: View {
 
             Spacer()
 
-            GlassPrimaryButton(title: LocalizedText.string(.open, language: localizationStore.resolvedLanguage), systemImage: "arrow.up.forward.app") {
+            Button {
                 router.showDashboard()
+            } label: {
+                Label(LocalizedText.string(.open, language: localizationStore.resolvedLanguage), systemImage: "arrow.up.forward.app")
             }
+            .buttonStyle(.bordered)
+            .buttonBorderShape(.roundedRectangle(radius: Radius.sm))
+            .controlSize(.small)
         }
     }
 
@@ -63,7 +69,8 @@ struct MenuBarDashboardView: View {
             .buttonStyle(.bordered)
 
             Button {
-                router.openSettings()
+                openSettings()
+                NSApp.activate(ignoringOtherApps: true)
             } label: {
                 Label(LocalizedText.string(.settings, language: localizationStore.resolvedLanguage), systemImage: "gearshape")
                     .font(theme.type.callout)
@@ -92,6 +99,10 @@ struct MenuBarDashboardView: View {
         }
         .padding(.horizontal, Space.sm)
         .padding(.vertical, 6)
+        .background {
+            RoundedRectangle(cornerRadius: Radius.sm, style: .continuous)
+                .fill(Color.primary.opacity(0.025))
+        }
     }
 
     private var footer: some View {

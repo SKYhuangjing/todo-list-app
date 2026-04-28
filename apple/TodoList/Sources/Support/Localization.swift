@@ -59,6 +59,13 @@ enum LocalizedKey: String, CaseIterable {
     case themeSubtitle
     case accent
     case accentSubtitle
+    case lightTheme
+    case lightThemeSubtitle
+    case darkTheme
+    case darkThemeSubtitle
+    case customAccent
+    case customAccentFormat
+    case reset
     case typography
     case typographySubtitle
     case density
@@ -210,6 +217,13 @@ enum LocalizedText {
             .themeSubtitle: "One click recipes. Fine-tune any dimension below.",
             .accent: "Accent",
             .accentSubtitle: "Brand tint for selected state and primary actions.",
+            .lightTheme: "Light theme",
+            .lightThemeSubtitle: "Used when the app is in Light or System Light.",
+            .darkTheme: "Dark theme",
+            .darkThemeSubtitle: "Used when the app is in Dark or System Dark.",
+            .customAccent: "Custom accent",
+            .customAccentFormat: "Custom accent %@",
+            .reset: "Reset",
             .typography: "Typography",
             .typographySubtitle: "Display and title family.",
             .density: "Density",
@@ -358,6 +372,13 @@ enum LocalizedText {
             .themeSubtitle: "一键套用预设，也可以继续细调下面每个维度。",
             .accent: "强调色",
             .accentSubtitle: "控制选中态和主要操作的品牌色。",
+            .lightTheme: "浅色主题",
+            .lightThemeSubtitle: "应用处于浅色或系统浅色时使用。",
+            .darkTheme: "深色主题",
+            .darkThemeSubtitle: "应用处于深色或系统深色时使用。",
+            .customAccent: "自定义强调色",
+            .customAccentFormat: "自定义强调色 %@",
+            .reset: "重置",
             .typography: "字体",
             .typographySubtitle: "控制展示标题和正文的字体风格。",
             .density: "密度",

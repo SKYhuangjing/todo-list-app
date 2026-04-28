@@ -23,11 +23,15 @@ final class QuickAddPanelController: NSObject, NSWindowDelegate {
         window.title = LocalizedText.string(.quickAddTitle, language: localizationStore.resolvedLanguage)
         window.titleVisibility = .hidden
         window.titlebarAppearsTransparent = true
+        window.isOpaque = false
+        window.backgroundColor = .clear
+        window.hasShadow = true
         window.isMovableByWindowBackground = true
         window.level = .floating
         window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         window.delegate = self
         window.isReleasedWhenClosed = false
+        window.standardWindowButton(.closeButton)?.isHidden = true
         window.standardWindowButton(.zoomButton)?.isHidden = true
         window.standardWindowButton(.miniaturizeButton)?.isHidden = true
         window.contentViewController = NSHostingController(rootView: makeRootView())

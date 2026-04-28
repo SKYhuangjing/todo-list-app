@@ -38,10 +38,11 @@ struct TodoListApp: App {
 
     private static func migrateSidebarLayoutIfNeeded() {
         let defaults = UserDefaults.standard
-        let migrationKey = "sidebar.compactDefault.migrated.v3"
+        let migrationKey = "sidebar.compactDefault.migrated.v4"
         guard !defaults.bool(forKey: migrationKey) else { return }
         for key in defaults.dictionaryRepresentation().keys
-            where key.hasPrefix("NSSplitView Subview Frames") {
+            where key.hasPrefix("NSSplitView Subview Frames")
+                || key.hasPrefix("NSWindow Frame") {
             defaults.removeObject(forKey: key)
         }
         defaults.set(true, forKey: migrationKey)
@@ -51,11 +52,11 @@ struct TodoListApp: App {
         WindowGroup(LocalizedText.string(.appName, language: localizationStore.resolvedLanguage), id: AppWindow.dashboard) {
             RootView(store: store, router: router)
                 .frame(
-                    minWidth: 1240,
-                    idealWidth: 1320,
+                    minWidth: 1040,
+                    idealWidth: 1120,
                     maxWidth: .infinity,
-                    minHeight: 780,
-                    idealHeight: 840,
+                    minHeight: 680,
+                    idealHeight: 740,
                     maxHeight: .infinity,
                     alignment: .topLeading
                 )
@@ -68,14 +69,14 @@ struct TodoListApp: App {
                     await settingsStore.bootstrap(router: router, localizationStore: localizationStore)
                 }
         }
-        .defaultSize(width: 1320, height: 840)
+        .defaultSize(width: 1120, height: 740)
         .defaultLaunchBehavior(.presented)
         .restorationBehavior(.disabled)
         .defaultWindowPlacement { content, context in
             let ideal = content.sizeThatFits(.unspecified)
             let visibleRect = context.defaultDisplay.visibleRect
-            let width = min(max(ideal.width, 1240), visibleRect.width)
-            let height = min(max(ideal.height, 780), visibleRect.height)
+            let width = min(max(ideal.width, 1040), visibleRect.width)
+            let height = min(max(ideal.height, 680), visibleRect.height)
             let x = visibleRect.midX - (width / 2)
             let y = visibleRect.midY - (height / 2)
             return WindowPlacement(CGPoint(x: x, y: y), size: CGSize(width: width, height: height))

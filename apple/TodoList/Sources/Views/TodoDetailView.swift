@@ -14,12 +14,20 @@ struct TodoDetailView: View {
                         header(for: todo)
 
                         if let screenshotPath = todo.screenshotPath {
-                            attachment(at: screenshotPath)
+                            DetailSection {
+                                attachment(at: screenshotPath)
+                            }
                         }
 
-                        notesSection(for: todo)
+                        if !todo.notes.isEmpty {
+                            DetailSection {
+                                notesSection(for: todo)
+                            }
+                        }
 
-                        metadataSection(for: todo)
+                        DetailSection {
+                            metadataSection(for: todo)
+                        }
 
                         deleteAction(for: todo)
                     }
@@ -37,7 +45,6 @@ struct TodoDetailView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .canvasPage()
         .animation(Motion.reveal, value: store.selectedTodo?.id)
     }
 
@@ -73,27 +80,26 @@ struct TodoDetailView: View {
                 }
             }
 
-            GlassChromeCluster {
-                HStack(spacing: Space.sm) {
-                    GlassPrimaryButton(
-                        title: todo.isCompleted
+            HStack(spacing: Space.sm) {
+                Button {
+                    Task { await store.toggleCompletion(for: todo.id) }
+                } label: {
+                    Label(
+                        todo.isCompleted
                             ? LocalizedText.string(.reopen, language: localizationStore.resolvedLanguage)
                             : LocalizedText.string(.complete, language: localizationStore.resolvedLanguage),
                         systemImage: todo.isCompleted ? "arrow.uturn.backward" : "checkmark"
-                    ) {
-                        Task { await store.toggleCompletion(for: todo.id) }
-                    }
-
-                    Spacer(minLength: 0)
+                    )
                 }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.regular)
+                .buttonBorderShape(.roundedRectangle(radius: Radius.sm))
+
+                Spacer(minLength: 0)
             }
             .padding(.top, Space.xs)
         }
-        .padding(Space.lg)
-        .glassChrome(
-            in: RoundedRectangle(cornerRadius: Radius.xl, style: .continuous),
-            tint: theme.accentColor.opacity(0.72)
-        )
+        .padding(.horizontal, 2)
     }
 
     private func statusPill(for todo: TodoItem) -> some View {
@@ -150,16 +156,11 @@ struct TodoDetailView: View {
         .clipShape(RoundedRectangle(cornerRadius: Radius.md, style: .continuous))
     }
 
-    @ViewBuilder
     private func notesSection(for todo: TodoItem) -> some View {
-        if todo.notes.isEmpty {
-            EmptyView()
-        } else {
-            Text(todo.notes)
-                .font(theme.type.body)
-                .foregroundStyle(Color.primary.opacity(0.88))
-                .fixedSize(horizontal: false, vertical: true)
-        }
+        Text(todo.notes)
+            .font(theme.type.body)
+            .foregroundStyle(Color.primary.opacity(0.88))
+            .fixedSize(horizontal: false, vertical: true)
     }
 
     private func metadataSection(for todo: TodoItem) -> some View {
@@ -192,7 +193,33 @@ struct TodoDetailView: View {
         DeleteTaskButton {
             Task { _ = await store.deleteTodo(id: todo.id) }
         }
-        .padding(.top, Space.sm)
+        .padding(.horizontal, Space.sm)
+        .padding(.top, Space.xs)
+    }
+}
+
+private struct DetailSection<Content: View>: View {
+    var tint: Color?
+    @ViewBuilder var content: () -> Content
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: Space.md) {
+            content()
+        }
+        .padding(Space.lg)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background {
+            RoundedRectangle(cornerRadius: Radius.md, style: .continuous)
+                .fill(SurfaceColor.canvas.opacity(0.42))
+                .glassSheet(
+                    in: RoundedRectangle(cornerRadius: Radius.md, style: .continuous),
+                    tint: tint
+                )
+        }
+        .overlay {
+            RoundedRectangle(cornerRadius: Radius.md, style: .continuous)
+                .strokeBorder(SurfaceColor.separatorSoft, lineWidth: 0.8)
+        }
     }
 }
 
@@ -201,30 +228,15 @@ private struct DeleteTaskButton: View {
 
     @Environment(\.theme) private var theme
     @Environment(LocalizationStore.self) private var localizationStore
-    @State private var isHovering = false
 
     var body: some View {
         Button(role: .destructive, action: action) {
             Label(LocalizedText.string(.deleteTask, language: localizationStore.resolvedLanguage), systemImage: "trash")
                 .font(theme.type.callout.weight(.medium))
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 8)
         }
-        .buttonStyle(.plain)
-        .foregroundStyle(isHovering ? Color.red.opacity(0.95) : Color.secondary)
-        .background {
-            RoundedRectangle(cornerRadius: Radius.sm, style: .continuous)
-                .fill(isHovering ? Color.red.opacity(0.08) : Color.primary.opacity(0.03))
-        }
-        .overlay {
-            RoundedRectangle(cornerRadius: Radius.sm, style: .continuous)
-                .strokeBorder(
-                    isHovering ? Color.red.opacity(0.28) : Color.primary.opacity(0.06),
-                    lineWidth: 1
-                )
-        }
-        .contentShape(RoundedRectangle(cornerRadius: Radius.sm, style: .continuous))
-        .onHover { isHovering = $0 }
-        .animation(Motion.hover, value: isHovering)
+        .buttonStyle(.bordered)
+        .controlSize(.small)
+        .tint(.red)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }

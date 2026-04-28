@@ -14,10 +14,6 @@ struct TaskRow: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: Space.md) {
-            PriorityBar(priority: todo.priority, isActive: !todo.isCompleted)
-                .frame(width: 3)
-                .frame(maxHeight: .infinity)
-
             checkbox
                 .padding(.top, 1)
 
@@ -35,7 +31,7 @@ struct TaskRow: View {
                     Text(todo.priority.title)
                         .font(theme.type.microLabel)
                         .tracking(0.4)
-                        .foregroundStyle(todo.priority.semanticTint.opacity(todo.isCompleted ? 0.5 : 0.9))
+                        .foregroundStyle(todo.priority.semanticTint.opacity(todo.isCompleted ? 0.5 : 0.78))
                 }
 
                 if theme.metrics.showsNotesPreview, !todo.notes.isEmpty {
@@ -57,6 +53,13 @@ struct TaskRow: View {
         .frame(minHeight: theme.metrics.taskRowMinHeight, alignment: .center)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(rowBackground)
+        .overlay(alignment: .leading) {
+            Capsule(style: .continuous)
+                .fill(todo.priority.semanticTint.opacity(todo.isCompleted ? 0.18 : 0.82))
+                .frame(width: isSelected ? 3 : 2)
+                .padding(.vertical, 12)
+                .opacity(isSelected || isHovering ? 1 : 0.55)
+        }
         .contentShape(Rectangle())
         .onTapGesture { onSelect() }
         .onHover { isHovering = $0 }
@@ -68,10 +71,14 @@ struct TaskRow: View {
     private var rowBackground: some View {
         if isSelected {
             RoundedRectangle(cornerRadius: Radius.md, style: .continuous)
-                .fill(theme.accentColor.opacity(0.08))
+                .fill(theme.accentColor.opacity(0.06))
+                .overlay {
+                    RoundedRectangle(cornerRadius: Radius.md, style: .continuous)
+                        .strokeBorder(theme.accentColor.opacity(0.14), lineWidth: 0.8)
+                }
         } else if isHovering {
             RoundedRectangle(cornerRadius: Radius.md, style: .continuous)
-                .fill(Color.primary.opacity(0.03))
+                .fill(Color.primary.opacity(0.025))
         }
     }
 

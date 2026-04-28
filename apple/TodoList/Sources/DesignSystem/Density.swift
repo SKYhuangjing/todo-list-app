@@ -44,25 +44,25 @@ struct DensityMetrics: Sendable {
         switch token {
         case .compact:
             return DensityMetrics(
-                taskRowMinHeight: 36,
+                taskRowMinHeight: 44,
                 taskRowHorizontalPadding: Space.md,
-                taskRowVerticalPadding: 6,
-                taskRowSpacing: 2,
-                sidebarRowHeight: 32,
+                taskRowVerticalPadding: 9,
+                taskRowSpacing: 3,
+                sidebarRowHeight: 36,
                 sidebarRowHorizontalPadding: Space.sm,
                 sidebarRowSpacing: 2,
-                sectionVerticalPadding: 10,
+                sectionVerticalPadding: 12,
                 sectionHorizontalPadding: Space.lg,
                 showsNotesPreview: false,
                 showsMetaChipsInRow: false
             )
         case .balanced:
             return DensityMetrics(
-                taskRowMinHeight: 48,
+                taskRowMinHeight: 54,
                 taskRowHorizontalPadding: Space.md,
-                taskRowVerticalPadding: 10,
-                taskRowSpacing: 3,
-                sidebarRowHeight: 36,
+                taskRowVerticalPadding: 12,
+                taskRowSpacing: 4,
+                sidebarRowHeight: 40,
                 sidebarRowHorizontalPadding: Space.sm,
                 sidebarRowSpacing: 3,
                 sectionVerticalPadding: 14,
@@ -72,11 +72,11 @@ struct DensityMetrics: Sendable {
             )
         case .comfortable:
             return DensityMetrics(
-                taskRowMinHeight: 62,
+                taskRowMinHeight: 68,
                 taskRowHorizontalPadding: Space.lg,
-                taskRowVerticalPadding: 14,
+                taskRowVerticalPadding: 16,
                 taskRowSpacing: 5,
-                sidebarRowHeight: 42,
+                sidebarRowHeight: 46,
                 sidebarRowHorizontalPadding: Space.md,
                 sidebarRowSpacing: 4,
                 sectionVerticalPadding: 18,

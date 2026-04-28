@@ -123,9 +123,27 @@ extension View {
     @ViewBuilder
     func adaptiveWindowBackground() -> some View {
         if #available(macOS 26.0, *) {
-            self.containerBackground(.ultraThinMaterial, for: .window)
-        } else {
             self
+                .containerBackground(.regularMaterial, for: .window)
+                .background {
+                    StableWindowBackdrop()
+                        .ignoresSafeArea()
+                }
+        } else {
+            self.background(SurfaceColor.canvas.ignoresSafeArea())
         }
+    }
+}
+
+private struct StableWindowBackdrop: View {
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        Rectangle()
+            .fill(.regularMaterial)
+            .overlay {
+                SurfaceColor.canvas
+                    .opacity(colorScheme == .dark ? 0.54 : 0.76)
+            }
     }
 }

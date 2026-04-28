@@ -23,8 +23,8 @@ struct SettingsView: View {
             DataSettingsTab(store: store, settingsStore: settingsStore, router: router)
                 .tabItem { Label(localizationStore.text(.settingsDataTab), systemImage: "externaldrive") }
         }
-        .frame(width: 680, height: 560)
-        .background(SurfaceColor.canvas.ignoresSafeArea())
+        .frame(width: 720, height: 600)
+        .background(.regularMaterial)
     }
 }
 
@@ -37,35 +37,52 @@ private struct AppearanceSettingsTab: View {
     @Environment(\.theme) private var theme
     @Environment(LocalizationStore.self) private var localizationStore
 
-    private let cardColumns = [GridItem(.adaptive(minimum: 168), spacing: Space.md, alignment: .top)]
-    private let swatchColumns = [GridItem(.adaptive(minimum: 72), spacing: Space.md, alignment: .top)]
+    private let cardColumns = [GridItem(.adaptive(minimum: 150), spacing: Space.md, alignment: .top)]
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: Space.xxl) {
+            VStack(alignment: .leading, spacing: Space.xl) {
+                modeSection
+
+                Divider().opacity(0.5)
+
                 presetSection
 
                 Divider().opacity(0.5)
 
-                accentSection
+                ThemeToneSection(
+                    title: localizationStore.text(.lightTheme),
+                    subtitle: localizationStore.text(.lightThemeSubtitle),
+                    colorScheme: .light,
+                    tone: themeStore.theme.light,
+                    themeStore: themeStore
+                )
+
+                ThemeToneSection(
+                    title: localizationStore.text(.darkTheme),
+                    subtitle: localizationStore.text(.darkThemeSubtitle),
+                    colorScheme: .dark,
+                    tone: themeStore.theme.dark,
+                    themeStore: themeStore
+                )
+
+                Divider().opacity(0.5)
+
                 typographySection
                 densitySection
 
                 Divider().opacity(0.5)
 
                 languageSection
-
-                Divider().opacity(0.5)
-
-                modeSection
             }
-            .padding(Space.xxl)
+            .padding(.horizontal, Space.xxl)
+            .padding(.vertical, Space.xl)
         }
         .scrollIndicators(.hidden)
     }
 
     private var presetSection: some View {
-        VStack(alignment: .leading, spacing: Space.md) {
+        VStack(alignment: .leading, spacing: Space.sm) {
             SettingsHeading(title: localizationStore.text(.theme), subtitle: localizationStore.text(.themeSubtitle))
 
             LazyVGrid(columns: cardColumns, alignment: .leading, spacing: Space.md) {
@@ -86,26 +103,6 @@ private struct AppearanceSettingsTab: View {
                         isSelected: true,
                         action: {}
                     )
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-        }
-    }
-
-    private var accentSection: some View {
-        VStack(alignment: .leading, spacing: Space.md) {
-            SettingsHeading(title: localizationStore.text(.accent), subtitle: localizationStore.text(.accentSubtitle))
-
-            LazyVGrid(columns: swatchColumns, alignment: .leading, spacing: Space.md) {
-                ForEach(AccentToken.allCases) { token in
-                    AccentSwatch(
-                        token: token,
-                        isSelected: themeStore.theme.accent == token
-                    ) {
-                        withAnimation(Motion.glassMorph) {
-                            themeStore.setAccent(token)
-                        }
-                    }
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -233,7 +230,7 @@ private struct PresetCard: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            .frame(maxWidth: .infinity, minHeight: 88, alignment: .leading)
+            .frame(maxWidth: .infinity, minHeight: 68, alignment: .leading)
             .padding(Space.md)
             .background {
                 RoundedRectangle(cornerRadius: Radius.md, style: .continuous)
@@ -251,43 +248,131 @@ private struct PresetCard: View {
     }
 }
 
+// MARK: - Theme tone
+
+private struct ThemeToneSection: View {
+    let title: String
+    let subtitle: String
+    let colorScheme: ColorScheme
+    let tone: ThemeTone
+    let themeStore: ThemeStore
+
+    @Environment(\.theme) private var theme
+    @Environment(LocalizationStore.self) private var localizationStore
+
+    private let swatchColumns = [GridItem(.adaptive(minimum: 58), spacing: Space.sm, alignment: .top)]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: Space.sm) {
+            HStack(alignment: .firstTextBaseline) {
+                SettingsHeading(title: title, subtitle: subtitle)
+
+                Spacer()
+
+                ColorPicker(
+                    localizationStore.text(.customAccent),
+                    selection: Binding(
+                        get: { tone.accentColor(for: colorScheme) },
+                        set: { newColor in
+                            withAnimation(Motion.glassMorph) {
+                                themeStore.setCustomAccent(newColor, for: colorScheme)
+                            }
+                        }
+                    ),
+                    supportsOpacity: false
+                )
+                .labelsHidden()
+
+                Button(localizationStore.text(.reset)) {
+                    withAnimation(Motion.glassMorph) {
+                        themeStore.clearCustomAccent(for: colorScheme)
+                    }
+                }
+                .buttonStyle(.borderless)
+                .foregroundStyle(.secondary)
+                .disabled(!tone.usesCustomAccent)
+            }
+            .padding(.bottom, Space.xs)
+
+            if let customAccentHex = tone.customAccentHex {
+                HStack(spacing: Space.sm) {
+                    Image(systemName: "paintpalette.fill")
+                        .foregroundStyle(tone.accentColor(for: colorScheme))
+                    Text(LocalizedText.format(.customAccentFormat, language: localizationStore.resolvedLanguage, customAccentHex))
+                        .font(theme.type.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            LazyVGrid(columns: swatchColumns, alignment: .leading, spacing: Space.md) {
+                ForEach(AccentToken.allCases) { token in
+                    AccentSwatch(
+                        token: token,
+                        colorScheme: colorScheme,
+                        isSelected: !tone.usesCustomAccent && tone.accent == token
+                    ) {
+                        withAnimation(Motion.glassMorph) {
+                            themeStore.setAccent(token, for: colorScheme)
+                        }
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, Space.md)
+            .padding(.vertical, Space.sm)
+            .background {
+                RoundedRectangle(cornerRadius: Radius.sm, style: .continuous)
+                    .fill(Color.primary.opacity(0.025))
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: Radius.sm, style: .continuous)
+                    .strokeBorder(Color.primary.opacity(0.06), lineWidth: 1)
+            }
+        }
+    }
+}
+
 // MARK: - Accent swatch
 
 private struct AccentSwatch: View {
     let token: AccentToken
+    let colorScheme: ColorScheme
     let isSelected: Bool
     let action: () -> Void
+
+    private var swatchColor: Color { token.color(for: colorScheme) }
 
     var body: some View {
         Button(action: action) {
             VStack(spacing: Space.xs) {
                 ZStack {
                     Circle()
-                        .fill(token.color)
-                        .frame(width: 36, height: 36)
+                        .fill(swatchColor)
+                        .frame(width: 30, height: 30)
 
                     if isSelected {
                         Circle()
                             .strokeBorder(.white, lineWidth: 2)
-                            .frame(width: 36, height: 36)
+                            .frame(width: 30, height: 30)
                         Image(systemName: "checkmark")
-                            .font(.system(size: 12, weight: .bold))
+                            .font(.system(size: 11, weight: .bold))
                             .foregroundStyle(.white)
                     }
                 }
                 .overlay {
                     Circle()
-                        .strokeBorder(isSelected ? token.color : Color.clear, lineWidth: 2)
-                        .frame(width: 44, height: 44)
+                        .strokeBorder(isSelected ? swatchColor : Color.clear, lineWidth: 2)
+                        .frame(width: 38, height: 38)
                 }
-                .frame(width: 44, height: 44)
+                .frame(width: 38, height: 38)
 
                 Text(token.displayName)
-                    .font(.system(size: 10.5, weight: .medium))
+                    .font(.system(size: 9.5, weight: .medium))
                     .foregroundStyle(isSelected ? .primary : .secondary)
                     .lineLimit(1)
+                    .minimumScaleFactor(0.78)
             }
-            .frame(maxWidth: .infinity, minHeight: 72)
+            .frame(maxWidth: .infinity, minHeight: 58)
         }
         .buttonStyle(.plain)
         .help(token.tagline)

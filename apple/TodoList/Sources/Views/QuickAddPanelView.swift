@@ -46,10 +46,22 @@ struct QuickAddPanelView: View {
                 }
         }
         .frame(width: 580, height: 700)
-        .background(SurfaceColor.canvasElevated.ignoresSafeArea())
+        .background {
+            RoundedRectangle(cornerRadius: Radius.xl, style: .continuous)
+                .fill(SurfaceColor.canvas.opacity(0.70))
+                .glassSheet(in: RoundedRectangle(cornerRadius: Radius.xl, style: .continuous))
+        }
+        .clipShape(RoundedRectangle(cornerRadius: Radius.xl, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: Radius.xl, style: .continuous)
+                .strokeBorder(SurfaceColor.separatorSoft, lineWidth: 0.8)
+        }
         .onAppear {
             hasPermission = ScreenshotService.hasPermission()
             titleFocused = true
+        }
+        .onExitCommand {
+            onClose()
         }
     }
 
@@ -300,9 +312,13 @@ struct QuickAddPanelView: View {
                 .keyboardShortcut(.cancelAction)
                 .buttonStyle(.bordered)
 
-            GlassPrimaryButton(title: LocalizedText.string(.saveTask, language: localizationStore.resolvedLanguage), systemImage: "return") {
+            Button {
                 Task { await saveDraft() }
+            } label: {
+                Label(LocalizedText.string(.saveTask, language: localizationStore.resolvedLanguage), systemImage: "return")
             }
+            .buttonStyle(.borderedProminent)
+            .buttonBorderShape(.roundedRectangle(radius: Radius.sm))
             .keyboardShortcut(.defaultAction)
             .disabled(!isSaveEnabled)
             .opacity(isSaveEnabled ? 1 : 0.42)
@@ -315,11 +331,12 @@ struct QuickAddPanelView: View {
     private func fieldBackground(focused: Bool) -> some View {
         ZStack {
             RoundedRectangle(cornerRadius: Radius.sm, style: .continuous)
-                .fill(Color.primary.opacity(focused ? 0.05 : 0.035))
+                .fill(Color.clear)
+                .glassSheet(in: RoundedRectangle(cornerRadius: Radius.sm, style: .continuous))
             RoundedRectangle(cornerRadius: Radius.sm, style: .continuous)
                 .strokeBorder(
-                    focused ? theme.accentColor.opacity(0.38) : Color.clear,
-                    lineWidth: 1
+                    focused ? theme.accentColor.opacity(0.44) : SurfaceColor.separatorSoft,
+                    lineWidth: focused ? 1.1 : 0.8
                 )
         }
         .animation(Motion.hover, value: focused)

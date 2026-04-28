@@ -1,4 +1,7 @@
 import SwiftUI
+#if canImport(AppKit)
+import AppKit
+#endif
 
 enum ThemePreset: String, CaseIterable, Identifiable, Codable, Sendable {
     case porcelain
@@ -26,12 +29,21 @@ enum ThemePreset: String, CaseIterable, Identifiable, Codable, Sendable {
         }
     }
 
-    var accent: AccentToken {
+    var lightAccent: AccentToken {
         switch self {
         case .porcelain: .inkNavy
         case .ember: .warmOrange
         case .sumi: .graphite
         case .custom: .inkNavy
+        }
+    }
+
+    var darkAccent: AccentToken {
+        switch self {
+        case .porcelain: .porcelainBlue
+        case .ember: .warmOrange
+        case .sumi: .graphite
+        case .custom: .porcelainBlue
         }
     }
 
@@ -54,13 +66,30 @@ enum ThemePreset: String, CaseIterable, Identifiable, Codable, Sendable {
     }
 }
 
+struct ThemeTone: Equatable, Codable, Sendable {
+    var accent: AccentToken
+    var customAccentHex: String?
+
+    var usesCustomAccent: Bool { customAccentHex != nil }
+
+    func accentColor(for colorScheme: ColorScheme) -> Color {
+        if let customAccentHex, let color = Color(hex: customAccentHex) {
+            return color
+        }
+        return accent.color(for: colorScheme)
+    }
+}
+
 struct Theme: Equatable, Sendable {
     var preset: ThemePreset
-    var accent: AccentToken
+    var light: ThemeTone
+    var dark: ThemeTone
     var typography: TypographyToken
     var density: DensityToken
 
-    var accentColor: Color { accent.color }
+    var accentColor: Color {
+        Self.adaptive(light: light.accentColor(for: .light), dark: dark.accentColor(for: .dark))
+    }
 
     var type: TypeScale { TypeScale.resolve(for: typography) }
 
@@ -72,29 +101,76 @@ struct Theme: Equatable, Sendable {
 
     init(preset: ThemePreset) {
         self.preset = preset
-        self.accent = preset.accent
+        self.light = ThemeTone(accent: preset.lightAccent)
+        self.dark = ThemeTone(accent: preset.darkAccent)
         self.typography = preset.typography
         self.density = preset.density
     }
 
-    init(accent: AccentToken, typography: TypographyToken, density: DensityToken) {
-        if let matched = Self.matchingPreset(accent: accent, typography: typography, density: density) {
+    init(light: ThemeTone, dark: ThemeTone, typography: TypographyToken, density: DensityToken) {
+        if let matched = Self.matchingPreset(light: light, dark: dark, typography: typography, density: density) {
             self.preset = matched
         } else {
             self.preset = .custom
         }
-        self.accent = accent
+        self.light = light
+        self.dark = dark
         self.typography = typography
         self.density = density
     }
 
-    static func matchingPreset(accent: AccentToken, typography: TypographyToken, density: DensityToken) -> ThemePreset? {
+    static func matchingPreset(light: ThemeTone, dark: ThemeTone, typography: TypographyToken, density: DensityToken) -> ThemePreset? {
         for preset in [ThemePreset.porcelain, .ember, .sumi] {
-            if preset.accent == accent && preset.typography == typography && preset.density == density {
+            if !light.usesCustomAccent
+                && !dark.usesCustomAccent
+                && preset.lightAccent == light.accent
+                && preset.darkAccent == dark.accent
+                && preset.typography == typography
+                && preset.density == density {
                 return preset
             }
         }
         return nil
+    }
+
+    private static func adaptive(light: Color, dark: Color) -> Color {
+        #if canImport(AppKit)
+        return Color(nsColor: NSColor(name: nil) { appearance in
+            let isDark = appearance.bestMatch(from: [.darkAqua, .vibrantDark]) != nil
+            return NSColor(isDark ? dark : light)
+        })
+        #else
+        return light
+        #endif
+    }
+}
+
+extension Color {
+    init?(hex: String) {
+        let cleaned = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        guard cleaned.count == 6, let value = UInt64(cleaned, radix: 16) else {
+            return nil
+        }
+
+        self.init(
+            red: Double((value >> 16) & 0xFF) / 255.0,
+            green: Double((value >> 8) & 0xFF) / 255.0,
+            blue: Double(value & 0xFF) / 255.0
+        )
+    }
+
+    var hexString: String? {
+        #if canImport(AppKit)
+        guard let color = NSColor(self).usingColorSpace(.sRGB) else {
+            return nil
+        }
+        let red = Int(round(color.redComponent * 255.0))
+        let green = Int(round(color.greenComponent * 255.0))
+        let blue = Int(round(color.blueComponent * 255.0))
+        return String(format: "#%02X%02X%02X", red, green, blue)
+        #else
+        return nil
+        #endif
     }
 }
 

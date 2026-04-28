@@ -49,16 +49,16 @@ struct TypeScale: Sendable {
     static func resolve(for token: TypographyToken) -> TypeScale {
         let displayDesign = token.displayDesign
         return TypeScale(
-            display: .system(size: 30, weight: .semibold, design: displayDesign),
-            title: .system(size: 22, weight: .semibold, design: displayDesign),
-            headline: .system(size: 16, weight: .semibold, design: displayDesign),
-            body: .system(size: 13.5, weight: .regular, design: .default),
-            callout: .system(size: 12, weight: .medium, design: .default),
-            caption: .system(size: 11, weight: .medium, design: .default),
-            microLabel: .system(size: 10.5, weight: .bold, design: .default),
-            keycap: .system(size: 11, weight: .semibold, design: .monospaced),
-            displayTracking: -0.4,
-            titleTracking: -0.2,
+            display: .system(size: 32, weight: .semibold, design: displayDesign),
+            title: .system(size: 24, weight: .semibold, design: displayDesign),
+            headline: .system(size: 17, weight: .semibold, design: displayDesign),
+            body: .system(size: 14.5, weight: .regular, design: .default),
+            callout: .system(size: 13, weight: .medium, design: .default),
+            caption: .system(size: 12, weight: .medium, design: .default),
+            microLabel: .system(size: 11, weight: .bold, design: .default),
+            keycap: .system(size: 12, weight: .semibold, design: .monospaced),
+            displayTracking: 0,
+            titleTracking: 0,
             microLabelTracking: 0.8
         )
     }

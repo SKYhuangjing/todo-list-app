@@ -9,6 +9,10 @@ final class ThemeStore {
 
     private let defaults: UserDefaults
     private let accentKey = "theme.accent"
+    private let lightAccentKey = "theme.light.accent"
+    private let lightCustomAccentKey = "theme.light.customAccent"
+    private let darkAccentKey = "theme.dark.accent"
+    private let darkCustomAccentKey = "theme.dark.customAccent"
     private let typographyKey = "theme.typography"
     private let densityKey = "theme.density"
     private let accentMigrationKey = "theme.accent.migratedTo.inkNavy"
@@ -26,10 +30,14 @@ final class ThemeStore {
             defaults.set(true, forKey: accentMigrationKey)
         }
 
-        let accent = AccentToken(rawValue: defaults.string(forKey: accentKey) ?? "") ?? .inkNavy
+        let legacyAccent = AccentToken(rawValue: defaults.string(forKey: accentKey) ?? "") ?? .inkNavy
+        let lightAccent = AccentToken(rawValue: defaults.string(forKey: lightAccentKey) ?? "") ?? legacyAccent
+        let darkAccent = AccentToken(rawValue: defaults.string(forKey: darkAccentKey) ?? "") ?? .porcelainBlue
+        let light = ThemeTone(accent: lightAccent, customAccentHex: defaults.string(forKey: lightCustomAccentKey))
+        let dark = ThemeTone(accent: darkAccent, customAccentHex: defaults.string(forKey: darkCustomAccentKey))
         let typography = TypographyToken(rawValue: defaults.string(forKey: typographyKey) ?? "") ?? .sfPro
         let density = DensityToken(rawValue: defaults.string(forKey: densityKey) ?? "") ?? .comfortable
-        self.theme = Theme(accent: accent, typography: typography, density: density)
+        self.theme = Theme(light: light, dark: dark, typography: typography, density: density)
     }
 
     func applyPreset(_ preset: ThemePreset) {
@@ -37,23 +45,48 @@ final class ThemeStore {
         persist()
     }
 
-    func setAccent(_ token: AccentToken) {
-        theme = Theme(accent: token, typography: theme.typography, density: theme.density)
+    func setAccent(_ token: AccentToken, for colorScheme: ColorScheme) {
+        setTone(ThemeTone(accent: token), for: colorScheme)
+    }
+
+    func setCustomAccent(_ color: Color, for colorScheme: ColorScheme) {
+        let fallback = colorScheme == .dark ? theme.dark.accent : theme.light.accent
+        setTone(
+            ThemeTone(accent: fallback, customAccentHex: color.hexString),
+            for: colorScheme
+        )
+    }
+
+    func clearCustomAccent(for colorScheme: ColorScheme) {
+        let tone = colorScheme == .dark ? theme.dark : theme.light
+        setTone(ThemeTone(accent: tone.accent), for: colorScheme)
+    }
+
+    private func setTone(_ tone: ThemeTone, for colorScheme: ColorScheme) {
+        if colorScheme == .dark {
+            theme = Theme(light: theme.light, dark: tone, typography: theme.typography, density: theme.density)
+        } else {
+            theme = Theme(light: tone, dark: theme.dark, typography: theme.typography, density: theme.density)
+        }
         persist()
     }
 
     func setTypography(_ token: TypographyToken) {
-        theme = Theme(accent: theme.accent, typography: token, density: theme.density)
+        theme = Theme(light: theme.light, dark: theme.dark, typography: token, density: theme.density)
         persist()
     }
 
     func setDensity(_ token: DensityToken) {
-        theme = Theme(accent: theme.accent, typography: theme.typography, density: token)
+        theme = Theme(light: theme.light, dark: theme.dark, typography: theme.typography, density: token)
         persist()
     }
 
     private func persist() {
-        defaults.set(theme.accent.rawValue, forKey: accentKey)
+        defaults.set(theme.light.accent.rawValue, forKey: accentKey)
+        defaults.set(theme.light.accent.rawValue, forKey: lightAccentKey)
+        defaults.set(theme.light.customAccentHex, forKey: lightCustomAccentKey)
+        defaults.set(theme.dark.accent.rawValue, forKey: darkAccentKey)
+        defaults.set(theme.dark.customAccentHex, forKey: darkCustomAccentKey)
         defaults.set(theme.typography.rawValue, forKey: typographyKey)
         defaults.set(theme.density.rawValue, forKey: densityKey)
     }
