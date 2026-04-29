@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "todo-list": {
+      "command": "python3",
+      "args": [
+        "./scripts/todo_mcp_server.py"
+      ],
+      "cwd": ".",
+      "env": {}
+    }
+  }
+}

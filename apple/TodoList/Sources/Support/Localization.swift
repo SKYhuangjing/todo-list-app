@@ -221,7 +221,7 @@ enum LocalizedKey: String, CaseIterable {
 enum LocalizedText {
     private static let tables: [ResolvedLanguage: [LocalizedKey: String]] = [
         .english: [
-            .appName: "Todo List",
+            .appName: "Todo",
             .settingsAppearanceTab: "Appearance",
             .settingsShortcutsTab: "Shortcuts",
             .settingsTagsTab: "Tags",
@@ -391,7 +391,7 @@ enum LocalizedText {
             .screenshotPermissionRequired: "Screen Recording access is required before capture can start."
         ],
         .simplifiedChinese: [
-            .appName: "待办清单",
+            .appName: "Todo",
             .settingsAppearanceTab: "外观",
             .settingsShortcutsTab: "快捷键",
             .settingsTagsTab: "标签",

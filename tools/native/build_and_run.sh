@@ -3,13 +3,14 @@ set -euo pipefail
 
 MODE="${1:-run}"
 APP_NAME="TodoListApp"
+DISPLAY_NAME="Todo"
 BUNDLE_ID="com.sky.todolistapp"
 MIN_SYSTEM_VERSION="15.0"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 PACKAGE_DIR="$ROOT_DIR/apple/TodoList"
 DIST_DIR="$ROOT_DIR/dist/native"
-APP_BUNDLE="$DIST_DIR/$APP_NAME.app"
+APP_BUNDLE="$DIST_DIR/$DISPLAY_NAME.app"
 APP_CONTENTS="$APP_BUNDLE/Contents"
 APP_MACOS="$APP_CONTENTS/MacOS"
 APP_RESOURCES="$APP_CONTENTS/Resources"
@@ -24,7 +25,7 @@ pkill -x "$APP_NAME" >/dev/null 2>&1 || true
 swift build --package-path "$PACKAGE_DIR"
 BUILD_BINARY="$(swift build --package-path "$PACKAGE_DIR" --show-bin-path)/$APP_NAME"
 
-rm -rf "$APP_BUNDLE"
+rm -rf "$APP_BUNDLE" "$DIST_DIR/$APP_NAME.app"
 mkdir -p "$APP_MACOS"
 mkdir -p "$APP_RESOURCES"
 cp "$BUILD_BINARY" "$APP_BINARY"
@@ -41,11 +42,11 @@ cat >"$INFO_PLIST" <<PLIST
   <key>CFBundleIdentifier</key>
   <string>$BUNDLE_ID</string>
   <key>CFBundleDisplayName</key>
-  <string>Todo List</string>
+  <string>$DISPLAY_NAME</string>
   <key>CFBundleIconFile</key>
   <string>icon.icns</string>
   <key>CFBundleName</key>
-  <string>Todo List</string>
+  <string>$DISPLAY_NAME</string>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>LSMinimumSystemVersion</key>

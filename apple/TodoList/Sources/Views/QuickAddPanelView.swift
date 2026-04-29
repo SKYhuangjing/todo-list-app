@@ -5,6 +5,7 @@ struct QuickAddPanelView: View {
     let onClose: () -> Void
 
     @Environment(\.theme) private var theme
+    @Environment(\.colorScheme) private var colorScheme
     @Environment(LocalizationStore.self) private var localizationStore
 
     @State private var draft = TodoDraft()
@@ -48,13 +49,13 @@ struct QuickAddPanelView: View {
         .frame(width: 580, height: 700)
         .background {
             RoundedRectangle(cornerRadius: Radius.xl, style: .continuous)
-                .fill(SurfaceColor.canvas.opacity(0.70))
+                .fill(theme.palette(for: colorScheme).canvas.opacity(0.70))
                 .glassSheet(in: RoundedRectangle(cornerRadius: Radius.xl, style: .continuous))
         }
         .clipShape(RoundedRectangle(cornerRadius: Radius.xl, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: Radius.xl, style: .continuous)
-                .strokeBorder(SurfaceColor.separatorSoft, lineWidth: 0.8)
+                .strokeBorder(theme.palette(for: colorScheme).separator, lineWidth: 0.8)
         }
         .onAppear {
             hasPermission = ScreenshotService.hasPermission()
@@ -335,7 +336,7 @@ struct QuickAddPanelView: View {
                 .glassSheet(in: RoundedRectangle(cornerRadius: Radius.sm, style: .continuous))
             RoundedRectangle(cornerRadius: Radius.sm, style: .continuous)
                 .strokeBorder(
-                    focused ? theme.accentColor.opacity(0.44) : SurfaceColor.separatorSoft,
+                    focused ? theme.accentColor.opacity(0.44) : theme.palette(for: colorScheme).separator,
                     lineWidth: focused ? 1.1 : 0.8
                 )
         }

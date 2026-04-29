@@ -1,0 +1,20 @@
+{
+  "name": "todo-list-app-local",
+  "interface": {
+    "displayName": "Todo List App Local"
+  },
+  "plugins": [
+    {
+      "name": "todo-list-codex",
+      "source": {
+        "source": "local",
+        "path": "./plugins/todo-list-codex"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

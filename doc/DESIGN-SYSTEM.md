@@ -27,19 +27,38 @@ Hard rules:
 
 ---
 
-## 2. Themes (User-Selectable)
+## 2. Themes V2 (User-Selectable)
 
-The Theme is three independent dimensions composed together. Users change any dimension; the app resolves to live tokens.
+V1 treated a theme as three independent controls:
 
 ```
-Theme = Accent × Typography × Density
+Theme V1 = Accent × Typography × Density
 ```
+
+That model is no longer enough. It makes presets look too similar because most visible surfaces still resolve from global neutral colors. V2 treats a theme as a complete **Design Recipe**: one user choice maps to palette, typography, density, glass, motion, and elevation tokens.
+
+```
+Theme V2 = ThemeRecipe × Optional Overrides
+
+ThemeRecipe = Palette + Accent + Typography + Density + LiquidGlass + Motion + Elevation
+```
+
+Rules:
+
+1. A preset must be visually recognizable in the main window without opening Settings.
+2. A preset must affect canvas, sidebar, controls, selected state, hover state, and modal surfaces.
+3. Manual edits are overrides on top of a preset. The UI should say "Custom based on Porcelain", not lose the source recipe.
+4. Semantic colors stay theme-independent. Done, overdue, and priority colors do not become brand colors.
+5. Accessibility overrides win over theme style: reduce transparency, reduce motion, and high contrast must be applied last.
 
 ### Accent palette
 
 | Token | Hex (light) | Hex (dark) | When to pick |
 |---|---|---|---|
-| `porcelainBlue` **(default)** | `#3A6FE0` | `#6C93F2` | Clean + premium. Neutral-cool. Think Things 3 / Linear. |
+| `inkNavy` **(default light)** | `#1E3A5F` | `#8FAED4` | Quiet, premium, work-focused. |
+| `graphite` | `#3E4654` | `#B2BCCE` | Neutral monochrome. Useful for Sumi-like surfaces. |
+| `cypress` | `#2B5750` | `#7FB3A9` | Deep green without colliding as strongly with Done. |
+| `porcelainBlue` **(default dark)** | `#3A6FE0` | `#6C93F2` | Clean + premium. Neutral-cool. Think Things 3 / Linear. |
 | `warmOrange` | `#F08A2C` | `#FFA347` | Warm, food-for-thought. Legacy brand color. |
 | `forestGreen` | `#2F9E65` | `#45C281` | Productivity-forward. Caution: collides with Done semantics. |
 | `violet` | `#7C5AE8` | `#A48CFF` | Showcases Liquid Glass refraction most dramatically. |
@@ -61,19 +80,88 @@ Theme = Accent × Typography × Density
 | `balanced` **(default)** | 48pt | 14 / 18 | 36pt | ~10 |
 | `comfortable` | 62pt | 18 / 22 | 42pt | ~7 |
 
-### Presets (one-click shortcut)
+### Liquid Glass profile
 
-| Preset | Accent | Typography | Density | Feel |
-|---|---|---|---|---|
-| **Porcelain** (default) | porcelainBlue | sfPro | balanced | Clean, restrained, premium |
-| **Ember** | warmOrange | sfPro | comfortable | Warm, approachable, magazine-y |
-| **Sumi** | systemAccent (near-black via Graphite UI) | sfPro | compact | Monochrome, high-information |
+Liquid Glass is not a boolean. It is a surface behavior profile.
+
+| Token | macOS 26 Glass | Fallback material | Use |
+|---|---|---|---|
+| `clear` | Neutral `.regular` / `.regular.interactive()` | Material + low-opacity neutral overlay | Default. Minimal distraction. |
+| `tinted` | Accent-tinted glass with stronger tint | Material + accent overlay + accent border | User wants visible brand glass. |
+| `vivid` | Strong tint, clearer edge, higher depth | Material + stronger accent overlay + stronger shadow | Optional future mode. Preview first; may be too expressive for daily work. |
+| `reduced` | No glass tint, flatter material | Solid or near-solid themed surface | Accessibility / Reduce Transparency. |
+
+### Presets as recipes
+
+| Preset | Palette | Accent | Typography | Density | Liquid Glass | Motion | Feel |
+|---|---|---|---|---|---|---|---|
+| **Porcelain** (default) | Warm paper, low contrast sidebar, ivory selected state | light `inkNavy`, dark `porcelainBlue` | `sfPro` | `comfortable` | `clear` | Calm crossfade + short selection spring | Quiet, premium, writing-first |
+| **Ember** | Warm amber paper, deeper warm sidebar, saturated selected state | light `warmOrange`, dark `forestGreen` | `sfProRounded` | `balanced` | `tinted` | Slightly warmer hover and glass morph | Approachable, warmer, more expressive |
+| **Sumi** | Cool graphite paper, high contrast sidebar, crisp selected state | light `graphite`, dark `violet` | `newYork` for headings, SF Pro body | `compact` | `clear` or `reduced` | Minimal movement | Dense, monochrome, high-information |
+| **Custom** | Starts from a recipe, then applies overrides | User-selected | User-selected | User-selected | User-selected | Inherits source recipe | User-owned combination |
+
+### Recipe token contract
+
+Each preset must resolve these runtime tokens. Views consume the resolved `Theme`, not raw preset branches.
+
+```swift
+struct ThemeRecipe: Codable, Sendable {
+    var preset: ThemePreset
+    var palette: PaletteRecipe
+    var lightAccent: AccentToken
+    var darkAccent: AccentToken
+    var typography: TypographyToken
+    var density: DensityToken
+    var liquidGlass: LiquidGlassToken
+    var motion: MotionToken
+    var elevation: ElevationToken
+}
+
+struct ThemeOverrides: Codable, Sendable {
+    var basePreset: ThemePreset
+    var lightAccent: AccentToken?
+    var darkAccent: AccentToken?
+    var typography: TypographyToken?
+    var density: DensityToken?
+    var liquidGlass: LiquidGlassToken?
+    var reduceTransparency: Bool?
+    var reduceMotion: Bool?
+    var highContrast: Bool?
+}
+```
+
+---
+
+## 2.1 Theme V2 UX
+
+Settings should present themes as a recipe first, controls second.
+
+```
+Appearance section
+├── Display mode        (System / Light / Dark)
+├── Theme recipe        (Porcelain / Ember / Sumi / Custom)
+│   └── Live app preview: sidebar + list + detail + Quick Add CTA
+├── Liquid Glass        (Reduced / Clear / Tinted / Vivid)
+└── Advanced            (collapsed by default)
+    ├── Accent
+    ├── Typography
+    ├── Density
+    └── Accessibility overrides
+```
+
+Interaction rules:
+
+1. Selecting a recipe updates the live preview immediately.
+2. Applying a recipe updates the whole app in one transaction.
+3. Changing an advanced control creates `Custom based on <last preset>`.
+4. Theme transition uses crossfade for palette, short spring for selected controls, and no layout animation for typography or density.
+5. Liquid Glass must always show a side-by-side preview because the difference is material behavior, not just color.
 
 ---
 
 ## 3. Color Tokens
 
-Foreground and surface are **derived from system colors**. We do not invent greys.
+Foreground is derived from system colors. Surfaces are resolved by the active Theme V2 palette.
 
 ```
 foreground.primary      = NSColor.labelColor
@@ -81,14 +169,28 @@ foreground.secondary    = NSColor.secondaryLabelColor
 foreground.tertiary     = NSColor.tertiaryLabelColor
 foreground.quaternary   = NSColor.quaternaryLabelColor
 
-canvas.base             = NSColor.textBackgroundColor          # near-white / near-black
-canvas.elevated         = NSColor.underPageBackgroundColor     # used behind Quick Add sheet
+canvas.base             = theme.palette.canvas
+canvas.elevated         = theme.palette.canvasElevated
+surface.sidebar         = theme.palette.sidebar
+surface.recessedControl = theme.palette.recessedControl
+surface.selectedControl = theme.palette.selectedControl
 
-separator.soft          = NSColor.separatorColor.withAlpha(0.35)
-separator.regular       = NSColor.separatorColor.withAlpha(0.65)
+separator.soft          = theme.palette.separator.opacity(0.65)
+separator.regular       = theme.palette.separator
 
 accent                  = Theme.accent              # single source for brand tint
 ```
+
+Palette recipes:
+
+| Token | Responsibility |
+|---|---|
+| `canvas` | Main paper layer behind task content. No material, no shadow. |
+| `canvasElevated` | Detail sections, Quick Add base, modal content bases. |
+| `sidebar` | Sidebar/navigation background. Must visibly differ per recipe. |
+| `recessedControl` | Text fields, hover rows, neutral setting controls. |
+| `selectedControl` | Selected setting cards and low-emphasis selected surfaces. |
+| `separator` | Hairline separators and low-emphasis outlines. |
 
 Semantic colors are **fixed, theme-independent**:
 
@@ -258,30 +360,47 @@ Removing filler copy is also part of the migration:
 
 ## 12. Settings Surface
 
-The Settings window exposes theme selection through three dimensions, each with a live preview on the right:
+The Settings window exposes theme selection as recipes with optional advanced overrides:
 
 ```
 Appearance section
-├── Preset (Porcelain / Ember / Sumi / Custom)
-├── Accent       (5 swatches)
-├── Typography   (3 samples showing "Today · 3 tasks")
-└── Density      (3 list previews)
+├── Display mode
+├── Theme recipe
+│   ├── Porcelain
+│   ├── Ember
+│   ├── Sumi
+│   └── Custom based on <recipe>
+├── Liquid Glass profile
+└── Advanced overrides
+    ├── Accent
+    ├── Typography
+    ├── Density
+    └── Accessibility
 ```
 
-Changing any individual dimension switches the preset to `Custom` automatically.
+Changing any advanced dimension switches the preset to `Custom based on <last recipe>` automatically.
 
 Settings state extends `AppSettingsSnapshot` with:
 
 ```swift
 struct ThemePreferences: Codable, Sendable {
-    var accent: AccentToken        // .porcelainBlue (default)
-    var typography: TypographyToken // .sfPro
-    var density: DensityToken       // .balanced
+    var preset: ThemePreset          // .porcelain
+    var basePreset: ThemePreset?     // set when preset == .custom
+    var lightAccent: AccentToken?
+    var darkAccent: AccentToken?
+    var typography: TypographyToken?
+    var density: DensityToken?
+    var liquidGlass: LiquidGlassToken?
+    var reduceTransparency: Bool?
+    var reduceMotion: Bool?
+    var highContrast: Bool?
 }
 ```
 
-Persisted via the existing `settings` SQLite table as four new keys:
-`theme_preset`, `theme_accent`, `theme_typography`, `theme_density`.
+Persisted via the existing `settings` SQLite table as separate keys:
+`theme_preset`, `theme_base_preset`, `theme_light_accent`, `theme_dark_accent`,
+`theme_typography`, `theme_density`, `theme_liquid_glass`,
+`theme_reduce_transparency`, `theme_reduce_motion`, `theme_high_contrast`.
 
 ---
 

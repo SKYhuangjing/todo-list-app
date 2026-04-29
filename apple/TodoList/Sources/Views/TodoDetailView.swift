@@ -201,8 +201,11 @@ struct TodoDetailView: View {
 private struct DetailSection<Content: View>: View {
     var tint: Color?
     @ViewBuilder var content: () -> Content
+    @Environment(\.theme) private var theme
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
+        let palette = theme.palette(for: colorScheme)
         VStack(alignment: .leading, spacing: Space.md) {
             content()
         }
@@ -210,7 +213,7 @@ private struct DetailSection<Content: View>: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background {
             RoundedRectangle(cornerRadius: Radius.md, style: .continuous)
-                .fill(SurfaceColor.canvas.opacity(0.42))
+                .fill(palette.canvasElevated.opacity(0.52))
                 .glassSheet(
                     in: RoundedRectangle(cornerRadius: Radius.md, style: .continuous),
                     tint: tint
@@ -218,7 +221,7 @@ private struct DetailSection<Content: View>: View {
         }
         .overlay {
             RoundedRectangle(cornerRadius: Radius.md, style: .continuous)
-                .strokeBorder(SurfaceColor.separatorSoft, lineWidth: 0.8)
+                .strokeBorder(palette.separator, lineWidth: 0.8)
         }
     }
 }

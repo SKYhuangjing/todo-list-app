@@ -83,11 +83,21 @@ That smoke verifier covers:
 - Default shortcuts in code: `F2` for Quick Add, `F3` for Dashboard
 - Existing local settings are preserved, so older preview builds may keep user-local values until changed in Settings
 
+## Codex Plugin
+
+- Local marketplace: `.agents/plugins/marketplace.json`
+- Plugin: `plugins/todo-list-codex`
+- MCP tools: read database info, list/get/create/update/delete todos, list/create tags
+- Default data source: `~/Library/Application Support/com.todolist.app/todo.db`
+
+Set `TODO_LIST_DB_PATH` in `plugins/todo-list-codex/.mcp.json` when Codex should use a test database instead of the app's real database.
+
 ## Repo Layout
 
 ```text
 todo-list-app/
 ├── apple/TodoList/            # Active native macOS app (SwiftUI + AppKit interop)
+├── plugins/todo-list-codex/   # Repo-local Codex MCP plugin for todo access
 ├── doc/                       # Architecture and migration docs
 ├── dist/native/               # Native packaged app output
 ├── tools/native/              # Native build/run/verify tools

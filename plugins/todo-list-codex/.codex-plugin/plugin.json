@@ -1,0 +1,44 @@
+{
+  "name": "todo-list-codex",
+  "version": "0.1.0",
+  "description": "Codex plugin for reading and writing the local Todo List app database.",
+  "author": {
+    "name": "Sky Huang",
+    "email": "",
+    "url": ""
+  },
+  "homepage": "",
+  "repository": "",
+  "license": "UNLICENSED",
+  "keywords": [
+    "codex",
+    "todo",
+    "mcp",
+    "local-plugin"
+  ],
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Todo List Codex",
+    "shortDescription": "Let Codex read, create, update, and delete local todos.",
+    "longDescription": "Exposes the Todo List app SQLite database through a local MCP server so Codex can inspect todos, manage tags, create tasks, and update task state without a separate network service.",
+    "developerName": "Sky Huang",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write",
+      "Local MCP"
+    ],
+    "websiteURL": "",
+    "privacyPolicyURL": "",
+    "termsOfServiceURL": "",
+    "defaultPrompt": [
+      "列出我当前未完成的 todo。",
+      "帮我创建一个新的 todo。",
+      "把指定 todo 标记为完成。"
+    ],
+    "brandColor": "#3B82F6",
+    "composerIcon": "./assets/todo-list-codex.svg",
+    "logo": "./assets/todo-list-codex.svg",
+    "screenshots": []
+  }
+}

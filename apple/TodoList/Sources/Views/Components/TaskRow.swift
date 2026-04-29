@@ -9,6 +9,7 @@ struct TaskRow: View {
     let onToggle: () -> Void
 
     @Environment(\.theme) private var theme
+    @Environment(\.colorScheme) private var colorScheme
     @Environment(LocalizationStore.self) private var localizationStore
     @State private var isHovering = false
 
@@ -78,7 +79,7 @@ struct TaskRow: View {
                 }
         } else if isHovering {
             RoundedRectangle(cornerRadius: Radius.md, style: .continuous)
-                .fill(SurfaceColor.recessedControl)
+                .fill(theme.palette(for: colorScheme).recessedControl)
         }
     }
 

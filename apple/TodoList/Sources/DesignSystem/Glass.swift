@@ -41,6 +41,9 @@ private struct GlassChromeModifier<S: InsettableShape>: ViewModifier {
         } else {
             content
                 .background(fallbackMaterial, in: shape)
+                .overlay {
+                    shape.fill(fallbackTintOverlay)
+                }
                 .overlay(shape.strokeBorder(strokeColor, lineWidth: 0.8))
                 .shadow(
                     color: fallbackShadowColor,
@@ -55,9 +58,9 @@ private struct GlassChromeModifier<S: InsettableShape>: ViewModifier {
     private func makeGlass() -> Glass {
         var glass: Glass = style == .sheet ? .regular : (interactive ? .regular.interactive() : .regular)
         if let tint {
-            glass = glass.tint(tint.opacity(colorScheme == .dark ? 0.22 : 0.18))
+            glass = glass.tint(tint.opacity(colorScheme == .dark ? 0.34 : 0.26))
         } else if theme.liquidGlass == .tinted {
-            glass = glass.tint(theme.accentColor.opacity(colorScheme == .dark ? 0.34 : 0.28))
+            glass = glass.tint(theme.accentColor.opacity(colorScheme == .dark ? 0.52 : 0.42))
         }
         return glass
     }
@@ -71,9 +74,21 @@ private struct GlassChromeModifier<S: InsettableShape>: ViewModifier {
 
     private var strokeColor: Color {
         if colorScheme == .dark {
-            return Color.white.opacity(style == .sheet ? 0.14 : 0.10)
+            return Color.white.opacity(theme.liquidGlass == .tinted ? 0.20 : (style == .sheet ? 0.14 : 0.10))
         }
-        return Color.black.opacity(style == .sheet ? 0.08 : 0.06)
+        return theme.liquidGlass == .tinted
+            ? theme.accentColor.opacity(0.28)
+            : Color.black.opacity(style == .sheet ? 0.08 : 0.06)
+    }
+
+    private var fallbackTintOverlay: Color {
+        if let tint {
+            return tint.opacity(colorScheme == .dark ? 0.16 : 0.10)
+        }
+        guard theme.liquidGlass == .tinted else {
+            return Color.white.opacity(colorScheme == .dark ? 0.02 : 0.04)
+        }
+        return theme.accentColor.opacity(colorScheme == .dark ? 0.24 : 0.16)
     }
 
     private var fallbackShadowColor: Color {
@@ -115,12 +130,12 @@ struct GlassChromeCluster<Content: View>: View {
 extension View {
     @ViewBuilder
     func canvasBackground() -> some View {
-        self.background(SurfaceColor.canvas.ignoresSafeArea())
+        modifier(ThemedCanvasBackgroundModifier(elevated: false))
     }
 
     @ViewBuilder
     func sheetCanvasBackground() -> some View {
-        self.background(SurfaceColor.canvasElevated.ignoresSafeArea())
+        modifier(ThemedCanvasBackgroundModifier(elevated: true))
     }
 
     @ViewBuilder
@@ -133,20 +148,40 @@ extension View {
                         .ignoresSafeArea()
                 }
         } else {
-            self.background(SurfaceColor.canvas.ignoresSafeArea())
+            modifier(ThemedCanvasBackgroundModifier(elevated: false))
         }
+    }
+}
+
+private struct ThemedCanvasBackgroundModifier: ViewModifier {
+    let elevated: Bool
+
+    @Environment(\.theme) private var theme
+    @Environment(\.colorScheme) private var colorScheme
+
+    func body(content: Content) -> some View {
+        let palette = theme.palette(for: colorScheme)
+        content.background((elevated ? palette.canvasElevated : palette.canvas).ignoresSafeArea())
     }
 }
 
 private struct StableWindowBackdrop: View {
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.theme) private var theme
 
     var body: some View {
+        let palette = theme.palette(for: colorScheme)
         Rectangle()
             .fill(.regularMaterial)
             .overlay {
-                SurfaceColor.canvas
-                    .opacity(colorScheme == .dark ? 0.82 : 0.88)
+                palette.canvas
+                    .opacity(theme.liquidGlass == .tinted ? (colorScheme == .dark ? 0.72 : 0.78) : (colorScheme == .dark ? 0.84 : 0.90))
+            }
+            .overlay {
+                if theme.liquidGlass == .tinted {
+                    theme.accentColor
+                        .opacity(colorScheme == .dark ? 0.12 : 0.08)
+                }
             }
     }
 }

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Todo List Codex">
+  <rect width="128" height="128" rx="28" fill="#1f2937"/>
+  <rect x="28" y="24" width="72" height="80" rx="12" fill="#f8fafc"/>
+  <path d="M44 50l8 8 18-20" fill="none" stroke="#2563eb" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M44 78h40" fill="none" stroke="#334155" stroke-width="8" stroke-linecap="round"/>
+  <path d="M44 94h28" fill="none" stroke="#94a3b8" stroke-width="8" stroke-linecap="round"/>
+</svg>

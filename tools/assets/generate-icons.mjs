@@ -1,4 +1,4 @@
-import sharp from 'sharp';
+import { createRequire } from 'module';
 import { mkdirSync, rmSync, writeFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -6,6 +6,8 @@ import { execFileSync } from 'child_process';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = join(__dirname, '..', '..');
+const require = createRequire(join(projectRoot, 'tauri', 'package.json'));
+const sharp = require('sharp');
 const iconsDir = join(projectRoot, 'tauri', 'src-tauri', 'icons');
 const svgPath = join(iconsDir, 'design', 'icon_fullbleed.svg');
 const iconsetDir = join(iconsDir, 'icon.iconset');
