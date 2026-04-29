@@ -31,13 +31,13 @@ struct TaskRow: View {
                     Text(todo.priority.title)
                         .font(theme.type.microLabel)
                         .tracking(0.4)
-                        .foregroundStyle(todo.priority.semanticTint.opacity(todo.isCompleted ? 0.5 : 0.78))
+                        .foregroundStyle(todo.priority.semanticTint.opacity(todo.isCompleted ? 0.58 : 0.94))
                 }
 
                 if theme.metrics.showsNotesPreview, !todo.notes.isEmpty {
                     Text(todo.notes)
                         .font(theme.type.callout)
-                        .foregroundStyle(.tertiary)
+                        .foregroundStyle(.secondary)
                         .lineLimit(1)
                         .truncationMode(.tail)
                 }
@@ -71,14 +71,14 @@ struct TaskRow: View {
     private var rowBackground: some View {
         if isSelected {
             RoundedRectangle(cornerRadius: Radius.md, style: .continuous)
-                .fill(theme.accentColor.opacity(0.06))
+                .fill(theme.accentColor.opacity(0.13))
                 .overlay {
                     RoundedRectangle(cornerRadius: Radius.md, style: .continuous)
-                        .strokeBorder(theme.accentColor.opacity(0.14), lineWidth: 0.8)
+                        .strokeBorder(theme.accentColor.opacity(0.34), lineWidth: 1)
                 }
         } else if isHovering {
             RoundedRectangle(cornerRadius: Radius.md, style: .continuous)
-                .fill(Color.primary.opacity(0.025))
+                .fill(SurfaceColor.recessedControl)
         }
     }
 

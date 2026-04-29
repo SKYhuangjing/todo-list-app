@@ -7,10 +7,10 @@ enum ScreenshotService {
     }
 
     static func requestPermission() {
-        if CGRequestScreenCaptureAccess() {
-            return
-        }
+        openSystemSettings()
+    }
 
+    static func openSystemSettings() {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/open")
         process.arguments = ["x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture"]

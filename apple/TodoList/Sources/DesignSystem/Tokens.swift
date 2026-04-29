@@ -40,7 +40,10 @@ struct Elevation {
 enum SurfaceColor {
     static var canvas: Color {
         #if canImport(AppKit)
-        Color(nsColor: .textBackgroundColor)
+        adaptive(
+            light: NSColor(calibratedRed: 0.965, green: 0.962, blue: 0.954, alpha: 1),
+            dark: NSColor(calibratedRed: 0.070, green: 0.070, blue: 0.066, alpha: 1)
+        )
         #else
         Color(.systemBackground)
         #endif
@@ -48,7 +51,10 @@ enum SurfaceColor {
 
     static var canvasElevated: Color {
         #if canImport(AppKit)
-        Color(nsColor: .underPageBackgroundColor)
+        adaptive(
+            light: NSColor(calibratedRed: 0.995, green: 0.992, blue: 0.984, alpha: 1),
+            dark: NSColor(calibratedRed: 0.120, green: 0.120, blue: 0.112, alpha: 1)
+        )
         #else
         Color(.secondarySystemBackground)
         #endif
@@ -56,7 +62,10 @@ enum SurfaceColor {
 
     static var sidebar: Color {
         #if canImport(AppKit)
-        Color(nsColor: .windowBackgroundColor)
+        adaptive(
+            light: NSColor(calibratedRed: 0.925, green: 0.922, blue: 0.912, alpha: 1),
+            dark: NSColor(calibratedRed: 0.105, green: 0.105, blue: 0.098, alpha: 1)
+        )
         #else
         Color(.systemBackground)
         #endif
@@ -77,6 +86,37 @@ enum SurfaceColor {
         Color.gray.opacity(0.3)
         #endif
     }
+
+    static var recessedControl: Color {
+        #if canImport(AppKit)
+        adaptive(
+            light: NSColor(calibratedRed: 0.925, green: 0.922, blue: 0.914, alpha: 1),
+            dark: NSColor(calibratedRed: 0.175, green: 0.175, blue: 0.165, alpha: 1)
+        )
+        #else
+        Color.gray.opacity(0.12)
+        #endif
+    }
+
+    static var selectedControl: Color {
+        #if canImport(AppKit)
+        adaptive(
+            light: NSColor(calibratedRed: 1.0, green: 0.988, blue: 0.968, alpha: 1),
+            dark: NSColor(calibratedRed: 0.205, green: 0.205, blue: 0.192, alpha: 1)
+        )
+        #else
+        Color.gray.opacity(0.18)
+        #endif
+    }
+
+    #if canImport(AppKit)
+    private static func adaptive(light: NSColor, dark: NSColor) -> Color {
+        Color(nsColor: NSColor(name: nil) { appearance in
+            let isDark = appearance.bestMatch(from: [.darkAqua, .vibrantDark]) != nil
+            return isDark ? dark : light
+        })
+    }
+    #endif
 }
 
 enum SemanticColor {

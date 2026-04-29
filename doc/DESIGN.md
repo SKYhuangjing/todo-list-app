@@ -152,8 +152,8 @@ The native app keeps the earlier SQLite model shape so migration remains cheap a
 ### Screenshot Permission
 
 1. Permission check uses `CGPreflightScreenCaptureAccess()`.
-2. Request flow uses `CGRequestScreenCaptureAccess()`.
-3. If access is still missing, the app opens the Screen Recording System Settings page.
+2. Request flow opens the Screen Recording System Settings page and shows an in-app drag guide.
+3. The app avoids `CGRequestScreenCaptureAccess()` so macOS does not show a duplicate system prompt.
 4. Interactive capture uses `/usr/sbin/screencapture -i -x`.
 
 ## Verification Strategy

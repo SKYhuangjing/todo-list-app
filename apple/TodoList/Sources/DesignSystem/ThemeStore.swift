@@ -15,6 +15,7 @@ final class ThemeStore {
     private let darkCustomAccentKey = "theme.dark.customAccent"
     private let typographyKey = "theme.typography"
     private let densityKey = "theme.density"
+    private let liquidGlassKey = "theme.liquidGlass"
     private let accentMigrationKey = "theme.accent.migratedTo.inkNavy"
 
     init(defaults: UserDefaults = .standard) {
@@ -37,11 +38,14 @@ final class ThemeStore {
         let dark = ThemeTone(accent: darkAccent, customAccentHex: defaults.string(forKey: darkCustomAccentKey))
         let typography = TypographyToken(rawValue: defaults.string(forKey: typographyKey) ?? "") ?? .sfPro
         let density = DensityToken(rawValue: defaults.string(forKey: densityKey) ?? "") ?? .comfortable
-        self.theme = Theme(light: light, dark: dark, typography: typography, density: density)
+        let liquidGlass = LiquidGlassToken(rawValue: defaults.string(forKey: liquidGlassKey) ?? "") ?? .clear
+        self.theme = Theme(light: light, dark: dark, typography: typography, density: density, liquidGlass: liquidGlass)
     }
 
     func applyPreset(_ preset: ThemePreset) {
-        theme = Theme(preset: preset)
+        var next = Theme(preset: preset)
+        next.liquidGlass = theme.liquidGlass
+        theme = next
         persist()
     }
 
@@ -64,20 +68,25 @@ final class ThemeStore {
 
     private func setTone(_ tone: ThemeTone, for colorScheme: ColorScheme) {
         if colorScheme == .dark {
-            theme = Theme(light: theme.light, dark: tone, typography: theme.typography, density: theme.density)
+            theme = Theme(light: theme.light, dark: tone, typography: theme.typography, density: theme.density, liquidGlass: theme.liquidGlass)
         } else {
-            theme = Theme(light: tone, dark: theme.dark, typography: theme.typography, density: theme.density)
+            theme = Theme(light: tone, dark: theme.dark, typography: theme.typography, density: theme.density, liquidGlass: theme.liquidGlass)
         }
         persist()
     }
 
     func setTypography(_ token: TypographyToken) {
-        theme = Theme(light: theme.light, dark: theme.dark, typography: token, density: theme.density)
+        theme = Theme(light: theme.light, dark: theme.dark, typography: token, density: theme.density, liquidGlass: theme.liquidGlass)
         persist()
     }
 
     func setDensity(_ token: DensityToken) {
-        theme = Theme(light: theme.light, dark: theme.dark, typography: theme.typography, density: token)
+        theme = Theme(light: theme.light, dark: theme.dark, typography: theme.typography, density: token, liquidGlass: theme.liquidGlass)
+        persist()
+    }
+
+    func setLiquidGlass(_ token: LiquidGlassToken) {
+        theme = Theme(light: theme.light, dark: theme.dark, typography: theme.typography, density: theme.density, liquidGlass: token)
         persist()
     }
 
@@ -89,5 +98,6 @@ final class ThemeStore {
         defaults.set(theme.dark.customAccentHex, forKey: darkCustomAccentKey)
         defaults.set(theme.typography.rawValue, forKey: typographyKey)
         defaults.set(theme.density.rawValue, forKey: densityKey)
+        defaults.set(theme.liquidGlass.rawValue, forKey: liquidGlassKey)
     }
 }

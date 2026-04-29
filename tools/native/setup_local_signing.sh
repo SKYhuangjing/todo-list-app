@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 SUPPORT_DIR="$HOME/Library/Application Support/com.todolist.app/local-signing"
-KEYCHAIN_PATH="$HOME/Library/Keychains/todo-list-local-dev.keychain-db"
+KEYCHAIN_PATH="$SUPPORT_DIR/todo-list-local-dev-v2.keychain-db"
 KEYCHAIN_PASSWORD_FILE="$SUPPORT_DIR/keychain-password"
 ENV_FILE="$SUPPORT_DIR/env.sh"
 CERT_NAME="Todo List Local Dev"

@@ -53,6 +53,13 @@ enum LocalizedKey: String, CaseIterable {
     case settingsShortcutsTab
     case settingsTagsTab
     case settingsDataTab
+    case settingsSidebarTitle
+    case liquidGlass
+    case liquidGlassSubtitle
+    case liquidGlassClear
+    case liquidGlassTinted
+    case liquidGlassClearTagline
+    case liquidGlassTintedTagline
     case language
     case languageSubtitle
     case theme
@@ -154,6 +161,14 @@ enum LocalizedKey: String, CaseIterable {
     case screenRecordingPermissionFormat
     case saveTask
     case grantScreenRecording
+    case screenRecordingGuideTitle
+    case screenRecordingGuideSubtitle
+    case screenRecordingGuideDragHint
+    case screenRecordingGuideStepOpen
+    case screenRecordingGuideStepDrag
+    case screenRecordingGuideStepReturn
+    case screenRecordingGuideOpenSettings
+    case screenRecordingGuideWaiting
     case captureScreenshot
     case replaceScreenshot
     case failedToSaveTask
@@ -211,6 +226,13 @@ enum LocalizedText {
             .settingsShortcutsTab: "Shortcuts",
             .settingsTagsTab: "Tags",
             .settingsDataTab: "Data",
+            .settingsSidebarTitle: "Settings",
+            .liquidGlass: "Liquid Glass",
+            .liquidGlassSubtitle: "Choose the preferred look for glass surfaces.",
+            .liquidGlassClear: "Clear",
+            .liquidGlassTinted: "Tinted",
+            .liquidGlassClearTagline: "System glass with minimal color.",
+            .liquidGlassTintedTagline: "Glass subtly follows the theme accent.",
             .language: "Language",
             .languageSubtitle: "Choose the app language or follow the system.",
             .theme: "Theme",
@@ -312,6 +334,14 @@ enum LocalizedText {
             .screenRecordingPermissionFormat: "Enable access for %@ in System Settings, then try capturing again.",
             .saveTask: "Save Task",
             .grantScreenRecording: "Grant Screen Recording",
+            .screenRecordingGuideTitle: "Screen Recording Permission",
+            .screenRecordingGuideSubtitle: "%@ needs this permission to attach screenshots to tasks.",
+            .screenRecordingGuideDragHint: "Drag the app icon into System Settings",
+            .screenRecordingGuideStepOpen: "Open Privacy & Security in System Settings.",
+            .screenRecordingGuideStepDrag: "Drop it into the Screen & System Audio Recording list if the app is not listed.",
+            .screenRecordingGuideStepReturn: "Turn on the toggle for this app.",
+            .screenRecordingGuideOpenSettings: "Open Settings",
+            .screenRecordingGuideWaiting: "SYSTEM SETTINGS",
             .captureScreenshot: "Capture Screenshot",
             .replaceScreenshot: "Replace Screenshot",
             .failedToSaveTask: "Failed to save task.",
@@ -366,6 +396,13 @@ enum LocalizedText {
             .settingsShortcutsTab: "快捷键",
             .settingsTagsTab: "标签",
             .settingsDataTab: "数据",
+            .settingsSidebarTitle: "设置",
+            .liquidGlass: "Liquid Glass",
+            .liquidGlassSubtitle: "选择玻璃界面的偏好外观。",
+            .liquidGlassClear: "清透",
+            .liquidGlassTinted: "染色",
+            .liquidGlassClearTagline: "尽量使用系统清透玻璃。",
+            .liquidGlassTintedTagline: "玻璃轻微跟随主题强调色。",
             .language: "语言",
             .languageSubtitle: "选择应用语言，或跟随系统。",
             .theme: "主题",
@@ -467,6 +504,14 @@ enum LocalizedText {
             .screenRecordingPermissionFormat: "请在系统设置里为 %@ 开启屏幕录制权限，然后再试一次。",
             .saveTask: "保存任务",
             .grantScreenRecording: "授权屏幕录制",
+            .screenRecordingGuideTitle: "屏幕录制权限",
+            .screenRecordingGuideSubtitle: "%@ 需要该权限后，才能把截图附加到任务里。",
+            .screenRecordingGuideDragHint: "把应用图标拖到系统设置",
+            .screenRecordingGuideStepOpen: "打开系统设置里的“隐私与安全性”。",
+            .screenRecordingGuideStepDrag: "如果录屏列表里没有该应用，把图标拖进去。",
+            .screenRecordingGuideStepReturn: "打开该应用右侧开关。",
+            .screenRecordingGuideOpenSettings: "打开设置",
+            .screenRecordingGuideWaiting: "系统设置",
             .captureScreenshot: "截取截图",
             .replaceScreenshot: "替换截图",
             .failedToSaveTask: "保存任务失败。",

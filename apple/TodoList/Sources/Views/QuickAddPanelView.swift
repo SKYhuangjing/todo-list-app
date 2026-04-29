@@ -434,7 +434,15 @@ struct QuickAddPanelView: View {
 
     private func captureScreenshotOrRequestPermission() async {
         if !hasPermission {
-            ScreenshotService.requestPermission()
+            onClose()
+            ScreenRecordingPermissionGuide.shared.present(
+                appDisplayName: appDisplayName,
+                language: localizationStore.resolvedLanguage,
+                onPermissionGranted: {
+                    hasPermission = true
+                    AppRouterHolder.shared.router?.showQuickAdd(preserveDraft: true)
+                }
+            )
             hasPermission = ScreenshotService.hasPermission()
             return
         }

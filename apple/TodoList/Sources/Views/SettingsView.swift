@@ -8,23 +8,134 @@ struct SettingsView: View {
     @Environment(\.theme) private var theme
     @Environment(ThemeStore.self) private var themeStore
     @Environment(LocalizationStore.self) private var localizationStore
+    @State private var selection: SettingsSection = .appearance
 
     var body: some View {
-        TabView {
-            AppearanceSettingsTab(settingsStore: settingsStore, themeStore: themeStore)
-                .tabItem { Label(localizationStore.text(.settingsAppearanceTab), systemImage: "paintpalette") }
-
-            ShortcutsSettingsTab(settingsStore: settingsStore, router: router)
-                .tabItem { Label(localizationStore.text(.settingsShortcutsTab), systemImage: "command") }
-
-            TagsSettingsTab(store: store)
-                .tabItem { Label(localizationStore.text(.settingsTagsTab), systemImage: "tag") }
-
-            DataSettingsTab(store: store, settingsStore: settingsStore, router: router)
-                .tabItem { Label(localizationStore.text(.settingsDataTab), systemImage: "externaldrive") }
+        NavigationSplitView {
+            List(SettingsSection.allCases, selection: $selection) { section in
+                Label(section.title(localizationStore), systemImage: section.systemImage)
+                    .tag(section)
+            }
+            .navigationTitle(localizationStore.text(.settingsSidebarTitle))
+            .listStyle(.sidebar)
+            .frame(minWidth: 170)
+        } detail: {
+            Group {
+                switch selection {
+                case .appearance:
+                    AppearanceSettingsTab(settingsStore: settingsStore, themeStore: themeStore)
+                case .shortcuts:
+                    ShortcutsSettingsTab(settingsStore: settingsStore, router: router)
+                case .tags:
+                    TagsSettingsTab(store: store)
+                case .data:
+                    DataSettingsTab(store: store, settingsStore: settingsStore, router: router)
+                }
+            }
+            .id(selection)
+            .transition(.asymmetric(
+                insertion: .move(edge: .trailing).combined(with: .opacity),
+                removal: .move(edge: .leading).combined(with: .opacity)
+            ))
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .frame(width: 720, height: 600)
-        .background(.regularMaterial)
+        .animation(Motion.settingsSection, value: selection)
+        .frame(width: 760, height: 620)
+        .adaptiveWindowBackground()
+        .background {
+            SettingsWindowBridge()
+                .frame(width: 0, height: 0)
+        }
+    }
+}
+
+private enum SettingsSection: String, CaseIterable, Identifiable {
+    case appearance
+    case shortcuts
+    case tags
+    case data
+
+    var id: String { rawValue }
+
+    var systemImage: String {
+        switch self {
+        case .appearance: "paintpalette"
+        case .shortcuts: "command"
+        case .tags: "tag"
+        case .data: "externaldrive"
+        }
+    }
+
+    @MainActor
+    func title(_ localizationStore: LocalizationStore) -> String {
+        switch self {
+        case .appearance: localizationStore.text(.settingsAppearanceTab)
+        case .shortcuts: localizationStore.text(.settingsShortcutsTab)
+        case .tags: localizationStore.text(.settingsTagsTab)
+        case .data: localizationStore.text(.settingsDataTab)
+        }
+    }
+}
+
+private struct AnimatedSettingsCardModifier: ViewModifier {
+    let isSelected: Bool
+    let selectedTint: Color
+    let cornerRadius: CGFloat
+
+    @State private var isHovering = false
+
+    func body(content: Content) -> some View {
+        content
+            .scaleEffect(isHovering ? 1.018 : 1)
+            .background {
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .fill(isSelected ? SurfaceColor.selectedControl : SurfaceColor.recessedControl)
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .strokeBorder(
+                        isSelected
+                            ? selectedTint.opacity(0.78)
+                            : Color.primary.opacity(isHovering ? 0.16 : 0.05),
+                        lineWidth: isSelected ? 2 : 1
+                    )
+            }
+            .shadow(
+                color: isHovering ? selectedTint.opacity(0.14) : Color.clear,
+                radius: isHovering ? 10 : 0,
+                y: isHovering ? 3 : 0
+            )
+            .contentShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+            .onHover { hovering in
+                withAnimation(Motion.hover) {
+                    isHovering = hovering
+                }
+            }
+            .animation(Motion.glassMorph, value: isSelected)
+    }
+}
+
+private struct SettingsCardButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.975 : 1)
+            .animation(Motion.cardPress, value: configuration.isPressed)
+    }
+}
+
+private extension View {
+    func animatedSettingsCard(
+        isSelected: Bool,
+        selectedTint: Color,
+        cornerRadius: CGFloat = Radius.md
+    ) -> some View {
+        modifier(
+            AnimatedSettingsCardModifier(
+                isSelected: isSelected,
+                selectedTint: selectedTint,
+                cornerRadius: cornerRadius
+            )
+        )
     }
 }
 
@@ -43,6 +154,10 @@ private struct AppearanceSettingsTab: View {
         ScrollView {
             VStack(alignment: .leading, spacing: Space.xl) {
                 modeSection
+
+                Divider().opacity(0.5)
+
+                liquidGlassSection
 
                 Divider().opacity(0.5)
 
@@ -174,6 +289,25 @@ private struct AppearanceSettingsTab: View {
         }
     }
 
+    private var liquidGlassSection: some View {
+        VStack(alignment: .leading, spacing: Space.md) {
+            SettingsHeading(title: localizationStore.text(.liquidGlass), subtitle: localizationStore.text(.liquidGlassSubtitle))
+
+            HStack(spacing: Space.md) {
+                ForEach(LiquidGlassToken.allCases) { token in
+                    LiquidGlassCard(
+                        token: token,
+                        isSelected: themeStore.theme.liquidGlass == token
+                    ) {
+                        withAnimation(Motion.glassMorph) {
+                            themeStore.setLiquidGlass(token)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private var languageSection: some View {
         VStack(alignment: .leading, spacing: Space.md) {
             SettingsHeading(title: localizationStore.text(.language), subtitle: localizationStore.text(.languageSubtitle))
@@ -232,19 +366,86 @@ private struct PresetCard: View {
             }
             .frame(maxWidth: .infinity, minHeight: 68, alignment: .leading)
             .padding(Space.md)
-            .background {
-                RoundedRectangle(cornerRadius: Radius.md, style: .continuous)
-                    .fill(Color.primary.opacity(0.035))
-            }
-            .overlay {
-                RoundedRectangle(cornerRadius: Radius.md, style: .continuous)
-                    .strokeBorder(
-                        isSelected ? previewAccent.opacity(0.7) : Color.clear,
-                        lineWidth: 1.5
-                    )
-            }
+            .animatedSettingsCard(isSelected: isSelected, selectedTint: previewAccent)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(SettingsCardButtonStyle())
+    }
+}
+
+// MARK: - Liquid Glass Card
+
+private struct LiquidGlassCard: View {
+    let token: LiquidGlassToken
+    let isSelected: Bool
+    let action: () -> Void
+
+    @Environment(\.theme) private var theme
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: Space.sm) {
+                ZStack(alignment: .bottomTrailing) {
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(previewBackground)
+                        .frame(height: 58)
+                        .overlay(alignment: .topLeading) {
+                            VStack(alignment: .leading, spacing: 5) {
+                                Capsule()
+                                    .fill(Color.white.opacity(0.82))
+                                    .frame(width: 68, height: 8)
+                                Capsule()
+                                    .fill(Color.white.opacity(0.46))
+                                    .frame(width: 42, height: 7)
+                            }
+                            .padding(10)
+                        }
+
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(.regularMaterial)
+                        .overlay {
+                            if token == .tinted {
+                                theme.accentColor.opacity(colorScheme == .dark ? 0.44 : 0.34)
+                            } else {
+                                Color.white.opacity(colorScheme == .dark ? 0.08 : 0.22)
+                            }
+                        }
+                        .frame(width: 92, height: 34)
+                        .overlay {
+                            Capsule()
+                                .fill(Color.white.opacity(0.55))
+                                .frame(width: 54, height: 12)
+                        }
+                        .padding(8)
+                }
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(token.displayName)
+                        .font(theme.type.callout.weight(.semibold))
+                    Text(token.tagline)
+                        .font(theme.type.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                }
+            }
+            .frame(width: 170, alignment: .topLeading)
+            .frame(minHeight: 124, alignment: .topLeading)
+            .padding(Space.md)
+            .animatedSettingsCard(isSelected: isSelected, selectedTint: theme.accentColor)
+        }
+        .buttonStyle(SettingsCardButtonStyle())
+    }
+
+    private var previewBackground: LinearGradient {
+        let tint = token == .tinted ? theme.accentColor : Color.blue
+        return LinearGradient(
+            colors: [
+                tint.opacity(token == .tinted ? (colorScheme == .dark ? 0.82 : 0.62) : (colorScheme == .dark ? 0.52 : 0.34)),
+                (token == .tinted ? theme.accentColor : Color.primary).opacity(colorScheme == .dark ? 0.34 : 0.14)
+            ],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
     }
 }
 
@@ -322,12 +523,14 @@ private struct ThemeToneSection: View {
             .padding(.vertical, Space.sm)
             .background {
                 RoundedRectangle(cornerRadius: Radius.sm, style: .continuous)
-                    .fill(Color.primary.opacity(0.025))
+                    .fill(SurfaceColor.recessedControl)
             }
             .overlay {
                 RoundedRectangle(cornerRadius: Radius.sm, style: .continuous)
                     .strokeBorder(Color.primary.opacity(0.06), lineWidth: 1)
             }
+            .animation(Motion.glassMorph, value: tone.accent)
+            .animation(Motion.glassMorph, value: tone.customAccentHex)
         }
     }
 }
@@ -339,6 +542,8 @@ private struct AccentSwatch: View {
     let colorScheme: ColorScheme
     let isSelected: Bool
     let action: () -> Void
+
+    @State private var isHovering = false
 
     private var swatchColor: Color { token.color(for: colorScheme) }
 
@@ -362,9 +567,10 @@ private struct AccentSwatch: View {
                 .overlay {
                     Circle()
                         .strokeBorder(isSelected ? swatchColor : Color.clear, lineWidth: 2)
-                        .frame(width: 38, height: 38)
+                        .frame(width: isHovering || isSelected ? 40 : 38, height: isHovering || isSelected ? 40 : 38)
                 }
-                .frame(width: 38, height: 38)
+                .frame(width: 42, height: 42)
+                .scaleEffect(isHovering ? 1.07 : 1)
 
                 Text(token.displayName)
                     .font(.system(size: 9.5, weight: .medium))
@@ -374,7 +580,13 @@ private struct AccentSwatch: View {
             }
             .frame(maxWidth: .infinity, minHeight: 58)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(SettingsCardButtonStyle())
+        .onHover { hovering in
+            withAnimation(Motion.hover) {
+                isHovering = hovering
+            }
+        }
+        .animation(Motion.glassMorph, value: isSelected)
         .help(token.tagline)
     }
 }
@@ -406,19 +618,9 @@ private struct TypographyCard: View {
             }
             .frame(maxWidth: .infinity, minHeight: 96, alignment: .leading)
             .padding(Space.md)
-            .background {
-                RoundedRectangle(cornerRadius: Radius.md, style: .continuous)
-                    .fill(Color.primary.opacity(0.035))
-            }
-            .overlay {
-                RoundedRectangle(cornerRadius: Radius.md, style: .continuous)
-                    .strokeBorder(
-                        isSelected ? theme.accentColor.opacity(0.7) : Color.clear,
-                        lineWidth: 1.5
-                    )
-            }
+            .animatedSettingsCard(isSelected: isSelected, selectedTint: theme.accentColor)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(SettingsCardButtonStyle())
     }
 }
 
@@ -463,19 +665,9 @@ private struct DensityCard: View {
             }
             .frame(maxWidth: .infinity, minHeight: 114, alignment: .leading)
             .padding(Space.md)
-            .background {
-                RoundedRectangle(cornerRadius: Radius.md, style: .continuous)
-                    .fill(Color.primary.opacity(0.035))
-            }
-            .overlay {
-                RoundedRectangle(cornerRadius: Radius.md, style: .continuous)
-                    .strokeBorder(
-                        isSelected ? theme.accentColor.opacity(0.7) : Color.clear,
-                        lineWidth: 1.5
-                    )
-            }
+            .animatedSettingsCard(isSelected: isSelected, selectedTint: theme.accentColor)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(SettingsCardButtonStyle())
     }
 }
 
@@ -534,7 +726,7 @@ private struct ShortcutsSettingsTab: View {
                 .padding(.vertical, 8)
                 .background {
                     RoundedRectangle(cornerRadius: Radius.sm, style: .continuous)
-                        .fill(Color.primary.opacity(0.04))
+                        .fill(SurfaceColor.recessedControl)
                 }
                 .frame(maxWidth: 200)
 
@@ -567,7 +759,7 @@ private struct ShortcutsSettingsTab: View {
         .padding(Space.md)
         .background {
             RoundedRectangle(cornerRadius: Radius.sm, style: .continuous)
-                .fill(Color.primary.opacity(0.04))
+                .fill(SurfaceColor.recessedControl)
         }
     }
 }
@@ -614,7 +806,7 @@ private struct TagsSettingsTab: View {
                     .padding(.vertical, 8)
                     .background {
                         RoundedRectangle(cornerRadius: Radius.sm, style: .continuous)
-                            .fill(Color.primary.opacity(0.04))
+                            .fill(SurfaceColor.recessedControl)
                     }
 
                 Button(localizationStore.text(.add)) {
@@ -652,7 +844,7 @@ private struct TagsSettingsTab: View {
         .padding(.vertical, 10)
         .background {
             RoundedRectangle(cornerRadius: Radius.sm, style: .continuous)
-                .fill(Color.primary.opacity(0.025))
+                .fill(SurfaceColor.recessedControl)
         }
     }
 }
@@ -737,7 +929,7 @@ private struct DataSettingsTab: View {
                     .padding(Space.md)
                     .background {
                         RoundedRectangle(cornerRadius: Radius.sm, style: .continuous)
-                            .fill(Color.primary.opacity(0.04))
+                            .fill(SurfaceColor.recessedControl)
                     }
                 }
             }

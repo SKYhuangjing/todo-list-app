@@ -66,6 +66,27 @@ enum ThemePreset: String, CaseIterable, Identifiable, Codable, Sendable {
     }
 }
 
+enum LiquidGlassToken: String, CaseIterable, Identifiable, Codable, Sendable {
+    case clear
+    case tinted
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .clear: LocalizedText.string(.liquidGlassClear)
+        case .tinted: LocalizedText.string(.liquidGlassTinted)
+        }
+    }
+
+    var tagline: String {
+        switch self {
+        case .clear: LocalizedText.string(.liquidGlassClearTagline)
+        case .tinted: LocalizedText.string(.liquidGlassTintedTagline)
+        }
+    }
+}
+
 struct ThemeTone: Equatable, Codable, Sendable {
     var accent: AccentToken
     var customAccentHex: String?
@@ -86,6 +107,7 @@ struct Theme: Equatable, Sendable {
     var dark: ThemeTone
     var typography: TypographyToken
     var density: DensityToken
+    var liquidGlass: LiquidGlassToken
 
     var accentColor: Color {
         Self.adaptive(light: light.accentColor(for: .light), dark: dark.accentColor(for: .dark))
@@ -105,9 +127,16 @@ struct Theme: Equatable, Sendable {
         self.dark = ThemeTone(accent: preset.darkAccent)
         self.typography = preset.typography
         self.density = preset.density
+        self.liquidGlass = .clear
     }
 
-    init(light: ThemeTone, dark: ThemeTone, typography: TypographyToken, density: DensityToken) {
+    init(
+        light: ThemeTone,
+        dark: ThemeTone,
+        typography: TypographyToken,
+        density: DensityToken,
+        liquidGlass: LiquidGlassToken = .clear
+    ) {
         if let matched = Self.matchingPreset(light: light, dark: dark, typography: typography, density: density) {
             self.preset = matched
         } else {
@@ -117,6 +146,7 @@ struct Theme: Equatable, Sendable {
         self.dark = dark
         self.typography = typography
         self.density = density
+        self.liquidGlass = liquidGlass
     }
 
     static func matchingPreset(light: ThemeTone, dark: ThemeTone, typography: TypographyToken, density: DensityToken) -> ThemePreset? {

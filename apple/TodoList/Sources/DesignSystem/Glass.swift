@@ -33,6 +33,7 @@ private struct GlassChromeModifier<S: InsettableShape>: ViewModifier {
     let style: GlassStyle
 
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.theme) private var theme
 
     func body(content: Content) -> some View {
         if #available(macOS 26.0, *) {
@@ -55,6 +56,8 @@ private struct GlassChromeModifier<S: InsettableShape>: ViewModifier {
         var glass: Glass = style == .sheet ? .regular : (interactive ? .regular.interactive() : .regular)
         if let tint {
             glass = glass.tint(tint.opacity(colorScheme == .dark ? 0.22 : 0.18))
+        } else if theme.liquidGlass == .tinted {
+            glass = glass.tint(theme.accentColor.opacity(colorScheme == .dark ? 0.34 : 0.28))
         }
         return glass
     }
@@ -143,7 +146,7 @@ private struct StableWindowBackdrop: View {
             .fill(.regularMaterial)
             .overlay {
                 SurfaceColor.canvas
-                    .opacity(colorScheme == .dark ? 0.54 : 0.76)
+                    .opacity(colorScheme == .dark ? 0.82 : 0.88)
             }
     }
 }
