@@ -6,6 +6,7 @@ struct RootView: View {
 
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
     @Environment(\.theme) private var theme
+    @Environment(\.openWindow) private var openWindow
     @Environment(\.openSettings) private var openSettings
     @Environment(LocalizationStore.self) private var localizationStore
 
@@ -66,6 +67,11 @@ struct RootView: View {
                 .frame(width: 0, height: 0)
         }
         .adaptiveWindowBackground()
+        .onAppear {
+            router.setDashboardOpener {
+                openWindow(id: AppWindow.dashboard)
+            }
+        }
     }
 
     private func toggleSidebar() {

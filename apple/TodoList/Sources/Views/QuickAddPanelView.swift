@@ -49,8 +49,8 @@ struct QuickAddPanelView: View {
         .frame(width: 580, height: 700)
         .background {
             RoundedRectangle(cornerRadius: Radius.xl, style: .continuous)
-                .fill(theme.palette(for: colorScheme).canvas.opacity(0.70))
-                .glassSheet(in: RoundedRectangle(cornerRadius: Radius.xl, style: .continuous))
+                .fill(quickAddSurface)
+                .neutralGlassSheet(in: RoundedRectangle(cornerRadius: Radius.xl, style: .continuous))
         }
         .clipShape(RoundedRectangle(cornerRadius: Radius.xl, style: .continuous))
         .overlay {
@@ -332,8 +332,8 @@ struct QuickAddPanelView: View {
     private func fieldBackground(focused: Bool) -> some View {
         ZStack {
             RoundedRectangle(cornerRadius: Radius.sm, style: .continuous)
-                .fill(Color.clear)
-                .glassSheet(in: RoundedRectangle(cornerRadius: Radius.sm, style: .continuous))
+                .fill(fieldSurface)
+                .neutralGlassSheet(in: RoundedRectangle(cornerRadius: Radius.sm, style: .continuous))
             RoundedRectangle(cornerRadius: Radius.sm, style: .continuous)
                 .strokeBorder(
                     focused ? theme.accentColor.opacity(0.44) : theme.palette(for: colorScheme).separator,
@@ -341,6 +341,26 @@ struct QuickAddPanelView: View {
                 )
         }
         .animation(Motion.hover, value: focused)
+    }
+
+    private var quickAddSurface: Color {
+        let palette = theme.palette(for: colorScheme)
+        switch colorScheme {
+        case .dark:
+            return palette.canvasElevated.opacity(0.88)
+        default:
+            return Color.white.opacity(0.72)
+        }
+    }
+
+    private var fieldSurface: Color {
+        let palette = theme.palette(for: colorScheme)
+        switch colorScheme {
+        case .dark:
+            return palette.recessedControl.opacity(0.64)
+        default:
+            return Color.white.opacity(0.60)
+        }
     }
 
     private var captureButtonTitle: String {

@@ -192,8 +192,10 @@ private struct AppearanceSettingsTab: View {
 
     @Environment(\.theme) private var theme
     @Environment(LocalizationStore.self) private var localizationStore
+    @State private var showsAdvanced = false
 
     private let cardColumns = [GridItem(.adaptive(minimum: 142), spacing: Space.sm, alignment: .top)]
+    private let glassColumns = [GridItem(.adaptive(minimum: 188), spacing: Space.sm, alignment: .top)]
 
     var body: some View {
         ScrollView {
@@ -202,34 +204,49 @@ private struct AppearanceSettingsTab: View {
 
                 Divider().opacity(0.5)
 
-                liquidGlassSection
-
-                Divider().opacity(0.5)
-
                 presetSection
 
                 Divider().opacity(0.5)
 
-                ThemeToneSection(
-                    title: localizationStore.text(.lightTheme),
-                    subtitle: localizationStore.text(.lightThemeSubtitle),
-                    colorScheme: .light,
-                    tone: themeStore.theme.light,
-                    themeStore: themeStore
-                )
-
-                ThemeToneSection(
-                    title: localizationStore.text(.darkTheme),
-                    subtitle: localizationStore.text(.darkThemeSubtitle),
-                    colorScheme: .dark,
-                    tone: themeStore.theme.dark,
-                    themeStore: themeStore
-                )
+                liquidGlassSection
 
                 Divider().opacity(0.5)
 
-                typographySection
-                densitySection
+                DisclosureGroup(isExpanded: $showsAdvanced) {
+                    VStack(alignment: .leading, spacing: Space.lg) {
+                        ThemeToneSection(
+                            title: localizationStore.text(.lightTheme),
+                            subtitle: localizationStore.text(.lightThemeSubtitle),
+                            colorScheme: .light,
+                            tone: themeStore.theme.light,
+                            themeStore: themeStore
+                        )
+
+                        ThemeToneSection(
+                            title: localizationStore.text(.darkTheme),
+                            subtitle: localizationStore.text(.darkThemeSubtitle),
+                            colorScheme: .dark,
+                            tone: themeStore.theme.dark,
+                            themeStore: themeStore
+                        )
+
+                        typographySection
+                        densitySection
+                        accessibilitySection
+                    }
+                    .padding(.top, Space.md)
+                } label: {
+                    SettingsHeading(
+                        title: localizationStore.text(.advancedAppearance),
+                        subtitle: themeStore.theme.preset == .custom
+                            ? LocalizedText.format(
+                                .customBasedOnFormat,
+                                language: localizationStore.resolvedLanguage,
+                                themeStore.theme.basePreset.displayName
+                            )
+                            : localizationStore.text(.themeSubtitle)
+                    )
+                }
 
                 Divider().opacity(0.5)
 
@@ -266,6 +283,9 @@ private struct AppearanceSettingsTab: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+
+            ThemeRecipePreview(theme: themeStore.theme)
+                .padding(.top, Space.xs)
         }
     }
 
@@ -338,7 +358,7 @@ private struct AppearanceSettingsTab: View {
         VStack(alignment: .leading, spacing: Space.sm) {
             SettingsHeading(title: localizationStore.text(.liquidGlass), subtitle: localizationStore.text(.liquidGlassSubtitle))
 
-            HStack(spacing: Space.sm) {
+            LazyVGrid(columns: glassColumns, alignment: .leading, spacing: Space.sm) {
                 ForEach(LiquidGlassToken.allCases) { token in
                     LiquidGlassCard(
                         token: token,
@@ -350,6 +370,32 @@ private struct AppearanceSettingsTab: View {
                     }
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    private var accessibilitySection: some View {
+        VStack(alignment: .leading, spacing: Space.md) {
+            SettingsHeading(
+                title: localizationStore.text(.accessibilityOverrides),
+                subtitle: localizationStore.text(.liquidGlassReducedTagline)
+            )
+
+            VStack(alignment: .leading, spacing: Space.sm) {
+                Toggle(localizationStore.text(.reduceTransparency), isOn: Binding(
+                    get: { themeStore.theme.reduceTransparency },
+                    set: { themeStore.setReduceTransparency($0) }
+                ))
+                Toggle(localizationStore.text(.reduceMotion), isOn: Binding(
+                    get: { themeStore.theme.reduceMotion },
+                    set: { themeStore.setReduceMotion($0) }
+                ))
+                Toggle(localizationStore.text(.highContrast), isOn: Binding(
+                    get: { themeStore.theme.highContrast },
+                    set: { themeStore.setHighContrast($0) }
+                ))
+            }
+            .toggleStyle(.switch)
         }
     }
 
@@ -375,6 +421,117 @@ private struct AppearanceSettingsTab: View {
             .pickerStyle(.segmented)
             .labelsHidden()
             .frame(maxWidth: 360)
+        }
+    }
+}
+
+// MARK: - Theme Recipe Preview
+
+private struct ThemeRecipePreview: View {
+    let theme: Theme
+
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        let palette = theme.palette(for: colorScheme)
+        HStack(spacing: 0) {
+            VStack(alignment: .leading, spacing: 6) {
+                previewSidebarItem(width: 42, active: true)
+                previewSidebarItem(width: 34, active: false)
+                previewSidebarItem(width: 28, active: false)
+                Spacer(minLength: 0)
+            }
+            .padding(10)
+            .frame(width: 82, height: 116)
+            .background(palette.sidebar)
+
+            VStack(alignment: .leading, spacing: 8) {
+                previewTask(width: 122, selected: true)
+                previewTask(width: 96, selected: false)
+                previewTask(width: 110, selected: false)
+
+                Spacer(minLength: 0)
+
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(theme.accentColor)
+                        .frame(width: 18, height: 18)
+                    Capsule()
+                        .fill(palette.recessedControl)
+                        .frame(width: 82, height: 18)
+                }
+            }
+            .padding(12)
+            .frame(width: 178, height: 116)
+            .background(palette.canvas)
+
+            VStack(alignment: .leading, spacing: 8) {
+                Capsule()
+                    .fill(theme.accentColor.opacity(0.82))
+                    .frame(width: 54, height: 8)
+                Capsule()
+                    .fill(Color.primary.opacity(0.28))
+                    .frame(width: 84, height: 6)
+                Capsule()
+                    .fill(Color.primary.opacity(0.16))
+                    .frame(width: 66, height: 6)
+                Spacer(minLength: 0)
+            }
+            .padding(12)
+            .frame(maxWidth: .infinity, minHeight: 116, maxHeight: 116)
+            .background(palette.canvasElevated)
+        }
+        .clipShape(RoundedRectangle(cornerRadius: Radius.md, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: Radius.md, style: .continuous)
+                .strokeBorder(palette.separator, lineWidth: 1)
+        }
+        .animation(theme.reduceMotion ? nil : Motion.glassMorph, value: theme.preset)
+        .animation(theme.reduceMotion ? nil : Motion.glassMorph, value: theme.liquidGlass)
+    }
+
+    private func previewSidebarItem(width: CGFloat, active: Bool) -> some View {
+        HStack(spacing: 5) {
+            Circle()
+                .fill(active ? theme.accentColor : Color.primary.opacity(0.16))
+                .frame(width: 8, height: 8)
+            Capsule()
+                .fill(active ? theme.accentColor.opacity(0.42) : Color.primary.opacity(0.12))
+                .frame(width: width, height: 6)
+        }
+        .padding(.horizontal, 6)
+        .frame(height: 18)
+        .background {
+            if active {
+                Capsule(style: .continuous)
+                    .fill(theme.accentColor.opacity(0.16))
+            }
+        }
+    }
+
+    private func previewTask(width: CGFloat, selected: Bool) -> some View {
+        HStack(spacing: 7) {
+            Circle()
+                .strokeBorder(selected ? theme.accentColor : Color.primary.opacity(0.22), lineWidth: 1.2)
+                .frame(width: 12, height: 12)
+            VStack(alignment: .leading, spacing: 4) {
+                Capsule()
+                    .fill(Color.primary.opacity(selected ? 0.54 : 0.32))
+                    .frame(width: width, height: 6)
+                if theme.metrics.showsNotesPreview {
+                    Capsule()
+                        .fill(Color.primary.opacity(0.14))
+                        .frame(width: width * 0.72, height: 5)
+                }
+            }
+        }
+        .padding(.horizontal, 8)
+        .frame(height: max(24, min(theme.metrics.taskRowMinHeight * 0.58, 40)), alignment: .leading)
+        .background {
+            if selected {
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(theme.accentColor.opacity(0.13))
+            }
         }
     }
 }
@@ -455,7 +612,7 @@ private struct LiquidGlassCard: View {
                         .lineLimit(2)
                 }
             }
-            .frame(width: 188, alignment: .leading)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .frame(minHeight: 52, alignment: .leading)
             .padding(.horizontal, Space.md)
             .padding(.vertical, 10)
@@ -471,10 +628,15 @@ private struct LiquidGlassCard: View {
             RoundedRectangle(cornerRadius: 8, style: .continuous)
                 .fill(.regularMaterial)
                 .overlay {
-                    if token == .tinted {
-                        theme.accentColor.opacity(colorScheme == .dark ? 0.44 : 0.34)
-                    } else {
+                    switch token {
+                    case .reduced:
+                        theme.palette(for: colorScheme).canvasElevated.opacity(0.70)
+                    case .clear:
                         Color.white.opacity(colorScheme == .dark ? 0.08 : 0.22)
+                    case .tinted:
+                        theme.accentColor.opacity(colorScheme == .dark ? 0.44 : 0.34)
+                    case .vivid:
+                        theme.accentColor.opacity(colorScheme == .dark ? 0.64 : 0.52)
                     }
                 }
                 .frame(width: 34, height: 22)
@@ -493,11 +655,18 @@ private struct LiquidGlassCard: View {
     }
 
     private var previewBackground: LinearGradient {
-        let tint = token == .tinted ? theme.accentColor : Color.blue
+        let tint = token == .tinted || token == .vivid ? theme.accentColor : token == .reduced ? Color.gray : Color.blue
+        let leadOpacity: Double
+        switch token {
+        case .reduced: leadOpacity = colorScheme == .dark ? 0.28 : 0.20
+        case .clear: leadOpacity = colorScheme == .dark ? 0.52 : 0.34
+        case .tinted: leadOpacity = colorScheme == .dark ? 0.82 : 0.62
+        case .vivid: leadOpacity = colorScheme == .dark ? 0.98 : 0.82
+        }
         return LinearGradient(
             colors: [
-                tint.opacity(token == .tinted ? (colorScheme == .dark ? 0.82 : 0.62) : (colorScheme == .dark ? 0.52 : 0.34)),
-                (token == .tinted ? theme.accentColor : Color.primary).opacity(colorScheme == .dark ? 0.34 : 0.14)
+                tint.opacity(leadOpacity),
+                (token == .tinted || token == .vivid ? theme.accentColor : Color.primary).opacity(colorScheme == .dark ? 0.34 : 0.14)
             ],
             startPoint: .topLeading,
             endPoint: .bottomTrailing

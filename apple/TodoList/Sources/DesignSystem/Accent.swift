@@ -7,6 +7,7 @@ enum AccentToken: String, CaseIterable, Identifiable, Codable, Sendable {
     case inkNavy
     case graphite
     case cypress
+    case sage
     case porcelainBlue
     case warmOrange
     case forestGreen
@@ -20,6 +21,7 @@ enum AccentToken: String, CaseIterable, Identifiable, Codable, Sendable {
         case .inkNavy: LocalizedText.string(.accentInkNavy)
         case .graphite: LocalizedText.string(.accentGraphite)
         case .cypress: LocalizedText.string(.accentCypress)
+        case .sage: LocalizedText.string(.accentSage)
         case .porcelainBlue: LocalizedText.string(.accentPorcelainBlue)
         case .warmOrange: LocalizedText.string(.accentWarmOrange)
         case .forestGreen: LocalizedText.string(.accentForestGreen)
@@ -33,6 +35,7 @@ enum AccentToken: String, CaseIterable, Identifiable, Codable, Sendable {
         case .inkNavy: LocalizedText.string(.accentInkNavyTagline)
         case .graphite: LocalizedText.string(.accentGraphiteTagline)
         case .cypress: LocalizedText.string(.accentCypressTagline)
+        case .sage: LocalizedText.string(.accentSageTagline)
         case .porcelainBlue: LocalizedText.string(.accentPorcelainBlueTagline)
         case .warmOrange: LocalizedText.string(.accentWarmOrangeTagline)
         case .forestGreen: LocalizedText.string(.accentForestGreenTagline)
@@ -59,6 +62,10 @@ enum AccentToken: String, CaseIterable, Identifiable, Codable, Sendable {
             return colorScheme == .dark
                 ? Color(red: 127.0/255.0, green: 179.0/255.0, blue: 169.0/255.0)
                 : Color(red: 43.0/255.0, green: 87.0/255.0, blue: 80.0/255.0)
+        case .sage:
+            return colorScheme == .dark
+                ? Color(red: 154.0/255.0, green: 184.0/255.0, blue: 159.0/255.0)
+                : Color(red: 94.0/255.0, green: 127.0/255.0, blue: 103.0/255.0)
         case .porcelainBlue:
             return colorScheme == .dark
                 ? Color(red: 108.0/255.0, green: 147.0/255.0, blue: 242.0/255.0)

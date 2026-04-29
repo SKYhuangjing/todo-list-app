@@ -56,14 +56,24 @@ enum LocalizedKey: String, CaseIterable {
     case settingsSidebarTitle
     case liquidGlass
     case liquidGlassSubtitle
+    case liquidGlassReduced
     case liquidGlassClear
     case liquidGlassTinted
+    case liquidGlassVivid
+    case liquidGlassReducedTagline
     case liquidGlassClearTagline
     case liquidGlassTintedTagline
+    case liquidGlassVividTagline
     case language
     case languageSubtitle
     case theme
     case themeSubtitle
+    case advancedAppearance
+    case accessibilityOverrides
+    case reduceTransparency
+    case reduceMotion
+    case highContrast
+    case customBasedOnFormat
     case accent
     case accentSubtitle
     case lightTheme
@@ -187,6 +197,7 @@ enum LocalizedKey: String, CaseIterable {
     case accentInkNavy
     case accentGraphite
     case accentCypress
+    case accentSage
     case accentPorcelainBlue
     case accentWarmOrange
     case accentForestGreen
@@ -195,6 +206,7 @@ enum LocalizedKey: String, CaseIterable {
     case accentInkNavyTagline
     case accentGraphiteTagline
     case accentCypressTagline
+    case accentSageTagline
     case accentPorcelainBlueTagline
     case accentWarmOrangeTagline
     case accentForestGreenTagline
@@ -228,15 +240,25 @@ enum LocalizedText {
             .settingsDataTab: "Data",
             .settingsSidebarTitle: "Settings",
             .liquidGlass: "Liquid Glass",
-            .liquidGlassSubtitle: "Choose the preferred look for glass surfaces.",
+            .liquidGlassSubtitle: "Material behavior for glass surfaces.",
+            .liquidGlassReduced: "Reduced",
             .liquidGlassClear: "Clear",
             .liquidGlassTinted: "Tinted",
+            .liquidGlassVivid: "Vivid",
+            .liquidGlassReducedTagline: "Flatter surfaces for readability.",
             .liquidGlassClearTagline: "System glass with minimal color.",
             .liquidGlassTintedTagline: "Glass subtly follows the theme accent.",
+            .liquidGlassVividTagline: "Stronger tint and depth.",
             .language: "Language",
             .languageSubtitle: "Choose the app language or follow the system.",
-            .theme: "Theme",
-            .themeSubtitle: "One click recipes. Fine-tune any dimension below.",
+            .theme: "Theme Recipe",
+            .themeSubtitle: "One choice changes palette, type, density, and glass.",
+            .advancedAppearance: "Advanced",
+            .accessibilityOverrides: "Accessibility",
+            .reduceTransparency: "Reduce transparency",
+            .reduceMotion: "Reduce motion",
+            .highContrast: "High contrast",
+            .customBasedOnFormat: "Custom based on %@",
             .accent: "Accent",
             .accentSubtitle: "Brand tint for selected state and primary actions.",
             .lightTheme: "Light theme",
@@ -350,16 +372,17 @@ enum LocalizedText {
             .quit: "Quit",
             .quitHelpFormat: "Quit %@",
             .themePorcelain: "Porcelain",
-            .themeEmber: "Ember",
+            .themeEmber: "Sage",
             .themeSumi: "Sumi",
             .themeCustom: "Custom",
             .themePorcelainTagline: "Clean · Restrained · Default",
-            .themeEmberTagline: "Warm · Magazine-y",
+            .themeEmberTagline: "Soft · Grounded",
             .themeSumiTagline: "Mono · Dense",
             .themeCustomTagline: "Your combination",
             .accentInkNavy: "Ink Navy",
             .accentGraphite: "Graphite",
             .accentCypress: "Cypress",
+            .accentSage: "Sage",
             .accentPorcelainBlue: "Porcelain Blue",
             .accentWarmOrange: "Warm Orange",
             .accentForestGreen: "Forest Green",
@@ -368,6 +391,7 @@ enum LocalizedText {
             .accentInkNavyTagline: "Editorial · Classic",
             .accentGraphiteTagline: "Quiet · Refined",
             .accentCypressTagline: "Library · Grounded",
+            .accentSageTagline: "Soft · Natural",
             .accentPorcelainBlueTagline: "Clean · Friendly",
             .accentWarmOrangeTagline: "Warm · Approachable",
             .accentForestGreenTagline: "Productive · Grounded",
@@ -398,15 +422,25 @@ enum LocalizedText {
             .settingsDataTab: "数据",
             .settingsSidebarTitle: "设置",
             .liquidGlass: "Liquid Glass",
-            .liquidGlassSubtitle: "选择玻璃界面的偏好外观。",
+            .liquidGlassSubtitle: "控制玻璃界面的材质表现。",
+            .liquidGlassReduced: "低透明",
             .liquidGlassClear: "清透",
             .liquidGlassTinted: "染色",
+            .liquidGlassVivid: "鲜明",
+            .liquidGlassReducedTagline: "降低透明度，优先保证可读性。",
             .liquidGlassClearTagline: "尽量使用系统清透玻璃。",
             .liquidGlassTintedTagline: "玻璃轻微跟随主题强调色。",
+            .liquidGlassVividTagline: "更强的染色和层次。",
             .language: "语言",
             .languageSubtitle: "选择应用语言，或跟随系统。",
-            .theme: "主题",
-            .themeSubtitle: "一键套用预设，也可以继续细调下面每个维度。",
+            .theme: "主题套件",
+            .themeSubtitle: "一次切换配色、字体、密度和玻璃效果。",
+            .advancedAppearance: "高级设置",
+            .accessibilityOverrides: "辅助访问",
+            .reduceTransparency: "降低透明度",
+            .reduceMotion: "减少动效",
+            .highContrast: "高对比度",
+            .customBasedOnFormat: "基于 %@ 自定义",
             .accent: "强调色",
             .accentSubtitle: "控制选中态和主要操作的品牌色。",
             .lightTheme: "浅色主题",
@@ -520,16 +554,17 @@ enum LocalizedText {
             .quit: "退出",
             .quitHelpFormat: "退出 %@",
             .themePorcelain: "瓷白",
-            .themeEmber: "余烬",
+            .themeEmber: "森雾",
             .themeSumi: "墨色",
             .themeCustom: "自定义",
             .themePorcelainTagline: "干净 · 克制 · 默认",
-            .themeEmberTagline: "温暖 · 杂志感",
+            .themeEmberTagline: "柔和 · 稳定",
             .themeSumiTagline: "单色 · 高密度",
             .themeCustomTagline: "你的组合",
             .accentInkNavy: "墨海军蓝",
             .accentGraphite: "石墨灰",
             .accentCypress: "柏木绿",
+            .accentSage: "鼠尾草绿",
             .accentPorcelainBlue: "瓷蓝",
             .accentWarmOrange: "暖橙",
             .accentForestGreen: "森林绿",
@@ -538,6 +573,7 @@ enum LocalizedText {
             .accentInkNavyTagline: "经典 · 编辑感",
             .accentGraphiteTagline: "安静 · 精致",
             .accentCypressTagline: "沉稳 · 书卷气",
+            .accentSageTagline: "柔和 · 自然",
             .accentPorcelainBlueTagline: "清爽 · 友好",
             .accentWarmOrangeTagline: "温暖 · 亲近",
             .accentForestGreenTagline: "高效 · 稳定",

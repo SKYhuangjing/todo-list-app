@@ -26,9 +26,11 @@ final class WindowRegistry {
         }
     }
 
-    func showDashboard() {
-        guard let dashboardWindow else { return }
+    @discardableResult
+    func showDashboard() -> Bool {
+        guard let dashboardWindow else { return false }
         dashboardWindow.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
+        return true
     }
 }

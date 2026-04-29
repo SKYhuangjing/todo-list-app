@@ -6,14 +6,26 @@ final class AppRouter {
     private let quickAddPanelController: QuickAddPanelController
     private let logger = Logger(subsystem: "com.sky.todolistapp", category: "routing")
     private let settingsWindowIdentifier = NSUserInterfaceItemIdentifier("com_apple_SwiftUI_Settings_window")
+    private var dashboardOpener: (() -> Void)?
 
     init(quickAddPanelController: QuickAddPanelController) {
         self.quickAddPanelController = quickAddPanelController
     }
 
+    func setDashboardOpener(_ opener: @escaping () -> Void) {
+        dashboardOpener = opener
+    }
+
     func showDashboard() {
         logger.info("show_dashboard")
-        WindowRegistry.shared.showDashboard()
+        if WindowRegistry.shared.showDashboard() {
+            return
+        }
+        dashboardOpener?()
+        DispatchQueue.main.async {
+            _ = WindowRegistry.shared.showDashboard()
+            NSApp.activate(ignoringOtherApps: true)
+        }
     }
 
     func showQuickAdd(preserveDraft: Bool = false) {

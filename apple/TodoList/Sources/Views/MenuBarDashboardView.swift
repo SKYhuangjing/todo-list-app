@@ -6,6 +6,7 @@ struct MenuBarDashboardView: View {
     let router: AppRouter
 
     @Environment(\.theme) private var theme
+    @Environment(\.openWindow) private var openWindow
     @Environment(\.openSettings) private var openSettings
     @Environment(LocalizationStore.self) private var localizationStore
 
@@ -32,6 +33,11 @@ struct MenuBarDashboardView: View {
         .padding(Space.lg)
         .frame(width: 320)
         .background(.regularMaterial)
+        .onAppear {
+            router.setDashboardOpener {
+                openWindow(id: AppWindow.dashboard)
+            }
+        }
     }
 
     private var summary: some View {

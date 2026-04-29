@@ -58,6 +58,7 @@ Rules:
 | `inkNavy` **(default light)** | `#1E3A5F` | `#8FAED4` | Quiet, premium, work-focused. |
 | `graphite` | `#3E4654` | `#B2BCCE` | Neutral monochrome. Useful for Sumi-like surfaces. |
 | `cypress` | `#2B5750` | `#7FB3A9` | Deep green without colliding as strongly with Done. |
+| `sage` | `#5E7F67` | `#9AB89F` | Soft natural green for low-glare warm surfaces. |
 | `porcelainBlue` **(default dark)** | `#3A6FE0` | `#6C93F2` | Clean + premium. Neutral-cool. Think Things 3 / Linear. |
 | `warmOrange` | `#F08A2C` | `#FFA347` | Warm, food-for-thought. Legacy brand color. |
 | `forestGreen` | `#2F9E65` | `#45C281` | Productivity-forward. Caution: collides with Done semantics. |
@@ -96,7 +97,7 @@ Liquid Glass is not a boolean. It is a surface behavior profile.
 | Preset | Palette | Accent | Typography | Density | Liquid Glass | Motion | Feel |
 |---|---|---|---|---|---|---|---|
 | **Porcelain** (default) | Warm paper, low contrast sidebar, ivory selected state | light `inkNavy`, dark `porcelainBlue` | `sfPro` | `comfortable` | `clear` | Calm crossfade + short selection spring | Quiet, premium, writing-first |
-| **Ember** | Warm amber paper, deeper warm sidebar, saturated selected state | light `warmOrange`, dark `forestGreen` | `sfProRounded` | `balanced` | `tinted` | Slightly warmer hover and glass morph | Approachable, warmer, more expressive |
+| **Sage / 森雾** | Soft sage paper, muted green sidebar, restrained ivory selected state | light `sage`, dark `sage` | `sfProRounded` | `balanced` | `tinted` | Slightly warm hover and glass morph | Calm, natural, and lower-glare than the former Ember recipe |
 | **Sumi** | Cool graphite paper, high contrast sidebar, crisp selected state | light `graphite`, dark `violet` | `newYork` for headings, SF Pro body | `compact` | `clear` or `reduced` | Minimal movement | Dense, monochrome, high-information |
 | **Custom** | Starts from a recipe, then applies overrides | User-selected | User-selected | User-selected | User-selected | Inherits source recipe | User-owned combination |
 
@@ -139,7 +140,7 @@ Settings should present themes as a recipe first, controls second.
 ```
 Appearance section
 ├── Display mode        (System / Light / Dark)
-├── Theme recipe        (Porcelain / Ember / Sumi / Custom)
+├── Theme recipe        (Porcelain / Sage / Sumi / Custom)
 │   └── Live app preview: sidebar + list + detail + Quick Add CTA
 ├── Liquid Glass        (Reduced / Clear / Tinted / Vivid)
 └── Advanced            (collapsed by default)
@@ -191,6 +192,8 @@ Palette recipes:
 | `recessedControl` | Text fields, hover rows, neutral setting controls. |
 | `selectedControl` | Selected setting cards and low-emphasis selected surfaces. |
 | `separator` | Hairline separators and low-emphasis outlines. |
+
+Quick Add is an exception to theme-wide glass tint. It is a capture surface, so its panel and input fields use neutral paper/glass even when the active Liquid Glass profile is `tinted` or `vivid`. Theme accent appears only on the save button and focused field border.
 
 Semantic colors are **fixed, theme-independent**:
 
@@ -367,7 +370,7 @@ Appearance section
 ├── Display mode
 ├── Theme recipe
 │   ├── Porcelain
-│   ├── Ember
+│   ├── Sage
 │   ├── Sumi
 │   └── Custom based on <recipe>
 ├── Liquid Glass profile

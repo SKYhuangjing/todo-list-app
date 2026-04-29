@@ -21,6 +21,11 @@ extension View {
     }
 
     @ViewBuilder
+    func neutralGlassSheet<S: InsettableShape>(in shape: S) -> some View {
+        modifier(GlassChromeModifier(shape: shape, tint: nil, interactive: false, style: .sheet, forceNeutral: true))
+    }
+
+    @ViewBuilder
     func glassInteractive<S: InsettableShape>(in shape: S, tint: Color? = nil) -> some View {
         modifier(GlassChromeModifier(shape: shape, tint: tint, interactive: true, style: .chrome))
     }
@@ -31,6 +36,7 @@ private struct GlassChromeModifier<S: InsettableShape>: ViewModifier {
     let tint: Color?
     let interactive: Bool
     let style: GlassStyle
+    var forceNeutral = false
 
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.theme) private var theme
@@ -57,10 +63,13 @@ private struct GlassChromeModifier<S: InsettableShape>: ViewModifier {
     @available(macOS 26.0, *)
     private func makeGlass() -> Glass {
         var glass: Glass = style == .sheet ? .regular : (interactive ? .regular.interactive() : .regular)
+        let glassProfile = forceNeutral ? .clear : theme.effectiveLiquidGlass
         if let tint {
             glass = glass.tint(tint.opacity(colorScheme == .dark ? 0.34 : 0.26))
-        } else if theme.liquidGlass == .tinted {
+        } else if glassProfile == .tinted {
             glass = glass.tint(theme.accentColor.opacity(colorScheme == .dark ? 0.52 : 0.42))
+        } else if glassProfile == .vivid {
+            glass = glass.tint(theme.accentColor.opacity(colorScheme == .dark ? 0.68 : 0.56))
         }
         return glass
     }
@@ -73,22 +82,32 @@ private struct GlassChromeModifier<S: InsettableShape>: ViewModifier {
     }
 
     private var strokeColor: Color {
-        if colorScheme == .dark {
-            return Color.white.opacity(theme.liquidGlass == .tinted ? 0.20 : (style == .sheet ? 0.14 : 0.10))
+        let glassProfile = forceNeutral ? .clear : theme.effectiveLiquidGlass
+        if glassProfile == .reduced {
+            return theme.palette(for: colorScheme).separator
         }
-        return theme.liquidGlass == .tinted
+        if colorScheme == .dark {
+            return Color.white.opacity(glassProfile == .vivid ? 0.26 : glassProfile == .tinted ? 0.20 : (style == .sheet ? 0.14 : 0.10))
+        }
+        return glassProfile == .vivid
+            ? theme.accentColor.opacity(0.40)
+            : glassProfile == .tinted
             ? theme.accentColor.opacity(0.28)
             : Color.black.opacity(style == .sheet ? 0.08 : 0.06)
     }
 
     private var fallbackTintOverlay: Color {
+        let glassProfile = forceNeutral ? .clear : theme.effectiveLiquidGlass
         if let tint {
             return tint.opacity(colorScheme == .dark ? 0.16 : 0.10)
         }
-        guard theme.liquidGlass == .tinted else {
+        if glassProfile == .reduced {
+            return theme.palette(for: colorScheme).canvasElevated.opacity(colorScheme == .dark ? 0.62 : 0.54)
+        }
+        guard glassProfile == .tinted || glassProfile == .vivid else {
             return Color.white.opacity(colorScheme == .dark ? 0.02 : 0.04)
         }
-        return theme.accentColor.opacity(colorScheme == .dark ? 0.24 : 0.16)
+        return theme.accentColor.opacity(glassProfile == .vivid ? (colorScheme == .dark ? 0.34 : 0.20) : (colorScheme == .dark ? 0.24 : 0.10))
     }
 
     private var fallbackShadowColor: Color {
@@ -99,6 +118,9 @@ private struct GlassChromeModifier<S: InsettableShape>: ViewModifier {
     }
 
     private var fallbackShadowRadius: CGFloat {
+        if !forceNeutral && theme.effectiveLiquidGlass == .reduced {
+            return 0
+        }
         switch style {
         case .sheet: return Elevation.modal.blur
         case .chrome: return Elevation.chrome.blur
@@ -106,6 +128,9 @@ private struct GlassChromeModifier<S: InsettableShape>: ViewModifier {
     }
 
     private var fallbackShadowY: CGFloat {
+        if !forceNeutral && theme.effectiveLiquidGlass == .reduced {
+            return 0
+        }
         switch style {
         case .sheet: return Elevation.modal.yOffset
         case .chrome: return Elevation.chrome.yOffset
@@ -175,13 +200,26 @@ private struct StableWindowBackdrop: View {
             .fill(.regularMaterial)
             .overlay {
                 palette.canvas
-                    .opacity(theme.liquidGlass == .tinted ? (colorScheme == .dark ? 0.72 : 0.78) : (colorScheme == .dark ? 0.84 : 0.90))
+                    .opacity(windowCanvasOpacity)
             }
             .overlay {
-                if theme.liquidGlass == .tinted {
+                if theme.effectiveLiquidGlass == .tinted || theme.effectiveLiquidGlass == .vivid {
                     theme.accentColor
-                        .opacity(colorScheme == .dark ? 0.12 : 0.08)
+                        .opacity(theme.effectiveLiquidGlass == .vivid ? (colorScheme == .dark ? 0.18 : 0.10) : (colorScheme == .dark ? 0.12 : 0.05))
                 }
             }
+    }
+
+    private var windowCanvasOpacity: Double {
+        switch theme.effectiveLiquidGlass {
+        case .reduced:
+            return 1
+        case .clear:
+            return colorScheme == .dark ? 0.84 : 0.90
+        case .tinted:
+            return colorScheme == .dark ? 0.72 : 0.84
+        case .vivid:
+            return colorScheme == .dark ? 0.62 : 0.76
+        }
     }
 }
